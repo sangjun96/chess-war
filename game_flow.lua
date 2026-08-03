@@ -24,6 +24,7 @@ function GameFlow.new(board, startingTeam)
     local self = setmetatable({
         board = board,
         activeTeam = startingTeam or "red",
+        turnNumber = 1,
         winner = nil,
         finished = false,
     }, GameFlow)
@@ -90,6 +91,7 @@ end
 function GameFlow:completeAction(action)
     if self:finishIfKingRemoved() then return end
     self.activeTeam = nextTeam[self.activeTeam]
+    self.turnNumber = self.turnNumber + 1
     self.board:clearSelection()
     self.status = teamName[self.activeTeam] .. " turn. " .. action .. " complete."
 end

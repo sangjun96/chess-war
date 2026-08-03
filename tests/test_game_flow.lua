@@ -22,7 +22,7 @@ return function()
     assert(not flow:canSelect(blueKing))
     assert(flow:beginMove())
     assert(flow:moveTo(1, 1))
-    assert(flow.activeTeam == "blue" and next(board.selectedPieces) == nil)
+    assert(flow.activeTeam == "blue" and flow.turnNumber == 2 and next(board.selectedPieces) == nil)
 
     board.selectedPieces = { [redPawn] = true }
     local winningFlow = GameFlow.new(board)

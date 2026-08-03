@@ -24,6 +24,9 @@ function love.load()
     skillEffects:load()
     fonts.title = love.graphics.newFont(18)
     fonts.body = love.graphics.newFont(12)
+    fonts.statusTitle = love.graphics.newFont(26)
+    fonts.statusBody = love.graphics.newFont(13)
+    fonts.resultTitle = love.graphics.newFont(34)
 end
 
 function love.update(dt)
