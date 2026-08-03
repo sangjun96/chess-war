@@ -15,7 +15,9 @@ one 16-piece army: four rooks, four bishops, six knights, and one each of the
 unique queen and king. A full line of 16 pawns stands in front of each army.
 The queen and king occupy the center two files.
 
-- Drag with the left mouse button to pan.
+- Click a piece to select it. Its tile receives a gold highlight and the piece receives a pointer above its head.
+- Drag from a pawn to draw a selection box. Only pawns inside the box are selected, so multiple-piece selection is limited to pawns.
+- Drag with the left mouse button from anywhere else to pan.
 - Use the mouse wheel to zoom toward the cursor.
 - Press `Home` to return to the center.
 

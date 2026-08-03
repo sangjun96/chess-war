@@ -25,6 +25,7 @@ function Board.new(size, cellSize, pieceScale)
         pieceScale = pieceScale,
         pixels = size * cellSize,
         pieces = Board:createStartingPieces(size),
+        selectedPieces = {},
     }, Board)
 end
 
@@ -80,6 +81,17 @@ function Board:drawTiles(camera, firstColumn, firstRow, lastColumn, lastRow)
             self.tiles:draw(column, row, x, y, self.cellSize)
         end
     end
+
+    -- Highlights are drawn after the full tile layer so neighboring tiles never
+    -- cover the selected tile's border.
+    for row = firstRow, lastRow do
+        for column = firstColumn, lastColumn do
+            if self:isTileSelected(column, row) then
+                local x, y = camera:worldToIso(column * self.cellSize, row * self.cellSize)
+                self.tiles:drawSelection(x, y, self.cellSize)
+            end
+        end
+    end
 end
 
 function Board:drawPiece(camera, piece)
@@ -90,13 +102,114 @@ function Board:drawPiece(camera, piece)
     self.pieceRenderer:draw(piece, centerX, centerY)
 end
 
-function Board:drawPieces(camera)
+function Board:isSelected(piece)
+    return self.selectedPieces[piece] == true
+end
+
+function Board:isTileSelected(column, row)
+    for piece in pairs(self.selectedPieces) do
+        if piece.column == column and piece.row == row then return true end
+    end
+    return false
+end
+
+function Board:clearSelection()
+    self.selectedPieces = {}
+end
+
+function Board:selectOnly(piece)
+    self.selectedPieces = { [piece] = true }
+end
+
+function Board:selectPawnsInScreenRect(camera, firstX, firstY, lastX, lastY, anchorPawn)
+    local minX, maxX = math.min(firstX, lastX), math.max(firstX, lastX)
+    local minY, maxY = math.min(firstY, lastY), math.max(firstY, lastY)
+    local spriteSize = 32 * self.pieceScale * camera.zoom
+    local spriteBaseX = 16 * self.pieceScale * camera.zoom
+    local spriteBaseY = 30 * self.pieceScale * camera.zoom
+
+    self:clearSelection()
+    for _, piece in ipairs(self.pieces) do
+        if piece.kind == "pawn" then
+            local x, y = self:screenPosition(camera, piece)
+            local spriteX, spriteY = x - spriteBaseX, y - spriteBaseY
+            local overlapsSelection = spriteX <= maxX and spriteX + spriteSize >= minX
+                and spriteY <= maxY and spriteY + spriteSize >= minY
+            if overlapsSelection or piece == anchorPawn then
+                self.selectedPieces[piece] = true
+            end
+        end
+    end
+end
+
+function Board:selectedCount()
+    local count = 0
+    for _ in pairs(self.selectedPieces) do count = count + 1 end
+    return count
+end
+
+function Board:screenPosition(camera, piece)
+    local width, height = love.graphics.getDimensions()
+    local centerX, centerY = camera:worldToIso(
+        (piece.column + 0.5) * self.cellSize,
+        (piece.row + 0.5) * self.cellSize
+    )
+    local cameraX, cameraY = camera:worldToIso(camera.x, camera.y)
+    return width / 2 + (centerX - cameraX) * camera.zoom,
+        height / 2 + (centerY - cameraY) * camera.zoom
+end
+
+function Board:pieceAtScreen(camera, screenX, screenY)
+    -- Test the rendered sprite bounds from front to back, so overlapping pieces
+    -- select the same one the player sees on top.
+    self:sortPieces()
+    local spriteSize = 32 * self.pieceScale * camera.zoom
+    local spriteBaseX = 16 * self.pieceScale * camera.zoom
+    local spriteBaseY = 30 * self.pieceScale * camera.zoom
+
+    for index = #self.pieces, 1, -1 do
+        local piece = self.pieces[index]
+        local x, y = self:screenPosition(camera, piece)
+        if screenX >= x - spriteBaseX and screenX <= x - spriteBaseX + spriteSize
+            and screenY >= y - spriteBaseY and screenY <= y - spriteBaseY + spriteSize then
+            return piece
+        end
+    end
+end
+
+function Board:drawSelectionPointer(camera, piece)
+    local x, y = camera:worldToIso(
+        (piece.column + 0.5) * self.cellSize,
+        (piece.row + 0.5) * self.cellSize
+    )
+    -- The pointer floats immediately above the piece's head.
+    local pointerY = y - 37 * self.pieceScale
+    -- Keep the marker proportional to its piece as the board zooms.
+    local pointerSize = 7
+    love.graphics.setColor(1, 0.88, 0.32, 1)
+    love.graphics.polygon("fill", x, pointerY + pointerSize, x - pointerSize, pointerY - pointerSize, x + pointerSize, pointerY - pointerSize)
+    love.graphics.setColor(0.18, 0.12, 0.03, 0.95)
+    love.graphics.setLineWidth(1)
+    love.graphics.polygon("line", x, pointerY + pointerSize, x - pointerSize, pointerY - pointerSize, x + pointerSize, pointerY - pointerSize)
+end
+
+function Board:sortPieces()
     table.sort(self.pieces, function(a, b)
         return a.column + a.row < b.column + b.row
     end)
+end
 
+function Board:drawPieces(camera)
+    self:sortPieces()
+
+    -- Images inherit LÖVE's current draw color, so reset it before every sprite pass.
+    love.graphics.setColor(1, 1, 1, 1)
     for _, piece in ipairs(self.pieces) do
         self:drawPiece(camera, piece)
+    end
+    -- Draw pointers last so selected pieces remain clearly marked when sprites overlap.
+    for _, piece in ipairs(self.pieces) do
+        if self:isSelected(piece) then self:drawSelectionPointer(camera, piece) end
     end
 end
 

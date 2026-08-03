@@ -15,4 +15,30 @@ function TileRenderer:draw(column, row, x, y, cellSize)
     love.graphics.draw(tile, x - cellSize / 2, y, 0, scaleX, scaleY)
 end
 
+function TileRenderer:drawSelection(x, y, cellSize)
+    local halfWidth = cellSize / 2
+    local halfHeight = cellSize / 4
+    local bottomY = y + cellSize / 2
+
+    -- Draw the selection over the tile, before pieces are rendered, so the
+    -- marker stays visible without obscuring the selected unit.
+    love.graphics.setColor(1, 0.82, 0.16, 0.20)
+    love.graphics.polygon("fill",
+        x, y + 2,
+        x + halfWidth - 3, y + halfHeight,
+        x, bottomY - 2,
+        x - halfWidth + 3, y + halfHeight
+    )
+
+    love.graphics.setColor(1, 0.9, 0.36, 0.95)
+    love.graphics.setLineWidth(2)
+    love.graphics.line(
+        x, y + 1,
+        x + halfWidth - 1, y + halfHeight,
+        x, bottomY - 1,
+        x - halfWidth + 1, y + halfHeight,
+        x, y + 1
+    )
+end
+
 return TileRenderer
