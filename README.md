@@ -17,9 +17,12 @@ The queen and king occupy the center two files.
 
 - Click a piece to select it. Its tile receives a gold highlight and the piece receives a pointer above its head.
 - Drag from a pawn to draw a selection box. Only pawns inside the box are selected, so multiple-piece selection is limited to pawns.
+- Press `Q` to open the action wheel at the cursor. Choose **Move**, then click a cyan tile to make a valid piece move (including captures). Movement requires exactly one selected piece.
+- `Attack` and `Guard` are visible future actions; they currently report that they are unavailable.
 - Drag with the left mouse button from anywhere else to pan.
+- Hold `W`, `A`, `S`, or `D` to move the camera. Diagonal key combinations move at the same speed as a single direction.
 - Use the mouse wheel to zoom toward the cursor.
-- Press `Home` to return to the center.
+- Press `Home` to return to the center. Press `Esc` to close a menu or cancel a move; press it again to quit.
 
 ## Artwork
 

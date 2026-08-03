@@ -41,4 +41,27 @@ function TileRenderer:drawSelection(x, y, cellSize)
     )
 end
 
+function TileRenderer:drawMoveTarget(x, y, cellSize)
+    local halfWidth = cellSize / 2
+    local halfHeight = cellSize / 4
+
+    -- A small cyan diamond keeps legal destinations readable without covering
+    -- the tile artwork or the piece that may be captured there.
+    love.graphics.setColor(0.24, 0.84, 1, 0.24)
+    love.graphics.polygon("fill",
+        x, y + 7,
+        x + halfWidth - 8, y + halfHeight,
+        x, y + cellSize / 2 - 7,
+        x - halfWidth + 8, y + halfHeight
+    )
+    love.graphics.setColor(0.5, 0.92, 1, 0.95)
+    love.graphics.setLineWidth(2)
+    love.graphics.polygon("line",
+        x, y + 7,
+        x + halfWidth - 8, y + halfHeight,
+        x, y + cellSize / 2 - 7,
+        x - halfWidth + 8, y + halfHeight
+    )
+end
+
 return TileRenderer
