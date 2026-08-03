@@ -10,4 +10,8 @@ From this directory:
 love .
 ```
 
-The project should open an 800×600 window displaying “Hello, world!”.
+The project opens an interactive 120×120 isometric chess board.
+
+- Drag with the left mouse button to pan.
+- Use the mouse wheel to zoom toward the cursor.
+- Press `Home` to return to the center.
