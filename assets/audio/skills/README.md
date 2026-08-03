@@ -9,6 +9,12 @@ The bundled sounds use the piece name as an MP3 filename:
 - `queen.mp3`
 - `king.mp3`
 
-Each skill definition selects its audio by its `audio` field. Missing files are
-ignored. For compatibility with existing custom packs, a skill-named Ogg file
-(such as `impact.ogg`) is used when the corresponding piece MP3 is unavailable.
+Each skill definition uses its `audio` cue to select the asset and align its
+delay, volume, pitch, fade, and maximum playback duration with the impact
+frame. Long clips are faded and stopped with the visual sequence. Missing files
+are ignored. For compatibility with existing custom packs, a skill-named Ogg
+file (such as `impact.ogg`) is used when the corresponding piece MP3 is
+unavailable.
+
+Formation attacks intentionally share one cue while keeping an animation on
+every target, so selecting several pawns does not stack the same sound.

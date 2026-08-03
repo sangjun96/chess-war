@@ -20,11 +20,13 @@ The queen and king occupy the center two files.
 - Every piece has HP and a pixel-style health gauge above it. Pawns have 3 HP, minor pieces 5 HP, rooks 7 HP, the queen 9 HP, and the king 12 HP. Pieces also become darker and less saturated as their HP falls.
 - Press `Q` to open the action wheel at the cursor. Choose **Move**, then click a cyan tile to move the selection. Moving onto an enemy deals the mover's damage; the attacker only takes that tile once the enemy's HP reaches zero. With multiple selected pawns, cyan tiles show only shared moves that every pawn can legally make; the move is applied to all of them together or not at all.
 - Choose **Attack**, then click an orange tile to fire the selected piece's skill without moving it. Skill targeting uses its own range instead of the piece's chess movement. When multiple pawns are selected, orange tiles cover their shared formation range and every selected pawn fires with the same target offset. For area skills, hover an orange tile to preview the red tiles that will be hit; area skills damage every enemy in their effect radius.
+- Skill effects play as a timed cast, travel, impact, and particle-tail sequence. Sound cues land on the impact frame; a multi-pawn volley keeps each visual hit while playing its shared sound only once.
 - `Guard` is a visible future action and currently reports that it is unavailable.
 - Each piece type has a replaceable combat skill. Edit the assignments in
   `piece_skills.lua` to switch effects without changing combat or rendering code.
   Edit `range` and `effectRadius` in `skill_catalog.lua` to tune its targeting.
-  Optional sounds can be added as `assets/audio/skills/<skill-id>.ogg`.
+  Piece sounds live at `assets/audio/skills/<piece-name>.mp3`; custom packs can
+  still fall back to `assets/audio/skills/<skill-id>.ogg`.
 - Drag with the left mouse button from anywhere else to pan.
 - Hold `W`, `A`, `S`, or `D` to move the camera. Diagonal key combinations move at the same speed as a single direction.
 - Use the mouse wheel to zoom toward the cursor.

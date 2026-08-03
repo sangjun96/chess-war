@@ -1,10 +1,7 @@
-local SkillEffectRenderer = {}
+local Feedback = require("skill_impact_feedback")
+local Motion = require("skill_effect_motion")
 
-local function directionAngle(sourceX, sourceY, targetX, targetY)
-    local y, x = targetY - sourceY, targetX - sourceX
-    if math.atan2 then return math.atan2(y, x) end
-    return math.atan(y, x)
-end
+local SkillEffectRenderer = {}
 
 local function layersFor(definition)
     return definition.layers or { definition }
@@ -38,40 +35,32 @@ function SkillEffectRenderer.load(catalog)
 end
 
 function SkillEffectRenderer.duration(definition)
-    local duration = 0
+    local duration = Feedback.duration(definition)
     for _, layer in ipairs(layersFor(definition)) do
         duration = math.max(duration, (layer.delay or 0) + layer.frameCount / layer.fps)
     end
     return duration
 end
 
-local function targetPosition(effect, board, camera)
-    local sourceX, sourceY = camera:worldToIso(
-        (effect.sourceColumn + 0.5) * board.cellSize,
-        (effect.sourceRow + 0.5) * board.cellSize
-    )
-    local targetX, targetY = camera:worldToIso(
-        (effect.targetColumn + 0.5) * board.cellSize,
-        (effect.targetRow + 0.5) * board.cellSize
-    )
-    return sourceX, sourceY, targetX, targetY
-end
-
 function SkillEffectRenderer.draw(effect, definition, animations, board, camera)
-    local sourceX, sourceY, targetX, targetY = targetPosition(effect, board, camera)
+    local sourceX, sourceY, targetX, targetY = Motion.centers(effect, board, camera)
+    Feedback.drawCast(effect, definition, board, sourceX, sourceY)
     for index, layer in ipairs(layersFor(definition)) do
         local elapsed = effect.elapsed - (layer.delay or 0)
         local frame = math.floor(elapsed * layer.fps) + 1
         if elapsed >= 0 and frame <= layer.frameCount then
-            local angle = layer.directional and directionAngle(sourceX, sourceY, targetX, targetY) or 0
-            local scale = layer.scale or 1
+            local x, y = Motion.position(layer, elapsed, sourceX, sourceY, targetX, targetY)
+            local angle = layer.directional and Motion.angle(sourceX, sourceY, targetX, targetY) or 0
+            local scale = Motion.scale(layer, elapsed)
             local animation = animations[index]
-            love.graphics.setColor(1, 1, 1, layer.opacity or 1)
+            love.graphics.setColor(1, 1, 1, Motion.opacity(layer, elapsed))
             love.graphics.draw(animation.image, animation.quads[frame],
-                targetX, targetY + (layer.offsetY or 0), angle, scale, scale,
+                x, y + (layer.offsetY or 0), angle, scale, scale,
                 layer.frameWidth / 2, layer.frameHeight / 2)
         end
     end
+    Feedback.drawImpact(effect, definition, board, targetX, targetY)
+    love.graphics.setColor(1, 1, 1, 1)
 end
 
 return SkillEffectRenderer
