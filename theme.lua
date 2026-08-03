@@ -10,4 +10,11 @@ return {
     actionEdge = { 145 / 255, 182 / 255, 215 / 255, 0.9 },
     actionMove = { 0.24, 0.78, 0.96, 0.94 },
     actionDisabled = { 0.34, 0.4, 0.48, 0.92 },
+    healthShadow = { 0.01, 0.015, 0.025, 0.9 },
+    healthOutline = { 0.08, 0.11, 0.14, 1 },
+    healthTrack = { 0.24, 0.05, 0.08, 1 },
+    healthHigh = { 0.2, 0.95, 0.43, 1 },
+    healthMid = { 1, 0.76, 0.2, 1 },
+    healthLow = { 1, 0.24, 0.24, 1 },
+    healthPixelShade = { 0.05, 0.08, 0.1, 0.82 },
 }

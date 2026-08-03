@@ -1,4 +1,5 @@
 local MoveGeneration = require("move_generation")
+local Combat = require("combat")
 
 local Rules = {}
 
@@ -93,22 +94,19 @@ function Rules.moveTo(board, column, row)
 
     for _, offset in ipairs(commands) do
         if isLegalFormationMove(board, board.movingPieces, offset) then
-            local captured = false
+            local destroyed, damaged = false, false
             for _, piece in ipairs(board.movingPieces) do
                 local target = Rules.pieceAt(board, piece.column + offset.columnOffset, piece.row + offset.rowOffset)
-                if target then
-                    for index, candidate in ipairs(board.pieces) do
-                        if candidate == target then table.remove(board.pieces, index); break end
-                    end
-                    captured = true
+                local targetDestroyed, targetDamaged = Combat.resolve(board, piece, target)
+                destroyed = destroyed or targetDestroyed
+                damaged = damaged or targetDamaged
+                if not target or targetDestroyed then
+                    piece.column = piece.column + offset.columnOffset
+                    piece.row = piece.row + offset.rowOffset
                 end
             end
-            for _, piece in ipairs(board.movingPieces) do
-                piece.column = piece.column + offset.columnOffset
-                piece.row = piece.row + offset.rowOffset
-            end
             Rules.cancelMove(board)
-            return true, captured
+            return true, destroyed, damaged
         end
     end
     return false

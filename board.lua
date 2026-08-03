@@ -2,14 +2,10 @@ local TileRenderer = require("tile_renderer")
 local PieceRenderer = require("piece_renderer")
 local Rules = require("board_rules")
 local Renderer = require("board_renderer")
+local StartingPieces = require("starting_pieces")
 
 local Board = {}
 Board.__index = Board
-
-local armyRank = {
-    "rook", "rook", "knight", "knight", "bishop", "bishop", "knight", "queen",
-    "king", "knight", "bishop", "bishop", "knight", "knight", "rook", "rook",
-}
 
 function Board.new(size, cellSize, pieceScale)
     return setmetatable({
@@ -17,24 +13,12 @@ function Board.new(size, cellSize, pieceScale)
         cellSize = cellSize,
         pieceScale = pieceScale,
         pixels = size * cellSize,
-        pieces = Board:createStartingPieces(size),
+        pieces = StartingPieces.create(size),
         selectedPieces = {},
         moveTargets = {},
         moveCommands = {},
         movingPieces = nil,
     }, Board)
-end
-
-function Board:createStartingPieces(size)
-    local pieces = {}
-    for column, kind in ipairs(armyRank) do
-        local boardColumn = column - 1
-        table.insert(pieces, { column = boardColumn, row = 0, kind = kind, team = "red" })
-        table.insert(pieces, { column = boardColumn, row = 1, kind = "pawn", team = "red" })
-        table.insert(pieces, { column = boardColumn, row = size - 2, kind = "pawn", team = "blue" })
-        table.insert(pieces, { column = boardColumn, row = size - 1, kind = kind, team = "blue" })
-    end
-    return pieces
 end
 
 function Board:loadAssets(assetPath)

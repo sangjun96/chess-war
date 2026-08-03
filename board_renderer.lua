@@ -1,4 +1,5 @@
 local Renderer = {}
+local PieceOverlayRenderer = require("piece_overlay_renderer")
 
 function Renderer.getVisibleCells(board, camera)
     local width, height = love.graphics.getDimensions()
@@ -71,20 +72,6 @@ function Renderer.pieceAtScreen(board, camera, screenX, screenY)
     end
 end
 
-local function drawSelectionPointer(board, camera, piece)
-    local x, y = camera:worldToIso(
-        (piece.column + 0.5) * board.cellSize,
-        (piece.row + 0.5) * board.cellSize
-    )
-    local pointerY = y - 37 * board.pieceScale
-    local pointerSize = 7
-    love.graphics.setColor(1, 0.88, 0.32, 1)
-    love.graphics.polygon("fill", x, pointerY + pointerSize, x - pointerSize, pointerY - pointerSize, x + pointerSize, pointerY - pointerSize)
-    love.graphics.setColor(0.18, 0.12, 0.03, 0.95)
-    love.graphics.setLineWidth(1)
-    love.graphics.polygon("line", x, pointerY + pointerSize, x - pointerSize, pointerY - pointerSize, x + pointerSize, pointerY - pointerSize)
-end
-
 function Renderer.drawPieces(board, camera)
     board:sortPieces()
     love.graphics.setColor(1, 1, 1, 1)
@@ -94,9 +81,10 @@ function Renderer.drawPieces(board, camera)
             (piece.row + 0.5) * board.cellSize
         )
         board.pieceRenderer:draw(piece, centerX, centerY)
+        PieceOverlayRenderer.drawHealth(piece, centerX, centerY, board.pieceScale)
     end
     for _, piece in ipairs(board.pieces) do
-        if board:isSelected(piece) then drawSelectionPointer(board, camera, piece) end
+        if board:isSelected(piece) then PieceOverlayRenderer.drawSelection(board, camera, piece) end
     end
 end
 

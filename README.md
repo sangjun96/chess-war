@@ -17,7 +17,8 @@ The queen and king occupy the center two files.
 
 - Click a piece to select it. Its tile receives a gold highlight and the piece receives a pointer above its head.
 - Drag from a pawn to draw a selection box. Only pawns inside the box are selected, so multiple-piece selection is limited to pawns.
-- Press `Q` to open the action wheel at the cursor. Choose **Move**, then click a cyan tile to move the selection (including captures). With multiple selected pawns, cyan tiles show only shared moves that every pawn can legally make; the move is applied to all of them together or not at all.
+- Every piece has HP and a pixel-style health gauge above it. Pawns have 3 HP, minor pieces 5 HP, rooks 7 HP, the queen 9 HP, and the king 12 HP. Pieces also become darker and less saturated as their HP falls.
+- Press `Q` to open the action wheel at the cursor. Choose **Move**, then click a cyan tile to move the selection. Moving onto an enemy deals the mover's damage; the attacker only takes that tile once the enemy's HP reaches zero. With multiple selected pawns, cyan tiles show only shared moves that every pawn can legally make; the move is applied to all of them together or not at all.
 - `Attack` and `Guard` are visible future actions; they currently report that they are unavailable.
 - Drag with the left mouse button from anywhere else to pan.
 - Hold `W`, `A`, `S`, or `D` to move the camera. Diagonal key combinations move at the same speed as a single direction.

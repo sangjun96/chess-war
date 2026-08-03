@@ -12,6 +12,17 @@ local spriteLocations = {
     king = { 4, 0 },
     queen = { 4, 1 },
 }
+local damageShaderCode = [[
+extern number damage;
+
+vec4 effect(vec4 color, Image texture, vec2 textureCoords, vec2 screenCoords) {
+    vec4 pixel = Texel(texture, textureCoords) * color;
+    number gray = dot(pixel.rgb, vec3(0.299, 0.587, 0.114));
+    pixel.rgb = mix(pixel.rgb, vec3(gray), damage);
+    pixel.rgb *= 1.0 - damage * 0.32;
+    return pixel;
+}
+]]
 
 function PieceRenderer.new(assetPath, scale)
     local blue = love.graphics.newImage(assetPath .. "/Isocubic_Chess_Small_Pieces_Blue.png")
@@ -20,6 +31,7 @@ function PieceRenderer.new(assetPath, scale)
         sheets = { blue = blue, red = red },
         quads = {},
         scale = scale or 1,
+        damageShader = love.graphics.newShader(damageShaderCode),
     }, PieceRenderer)
 
     for kind, location in pairs(spriteLocations) do
@@ -36,6 +48,10 @@ function PieceRenderer.new(assetPath, scale)
 end
 
 function PieceRenderer:draw(piece, x, y)
+    local damage = (1 - piece.hp / piece.maxHp) * 0.85
+    love.graphics.setColor(1, 1, 1, 1)
+    self.damageShader:send("damage", damage)
+    love.graphics.setShader(self.damageShader)
     love.graphics.draw(
         self.sheets[piece.team],
         self.quads[piece.kind],
@@ -45,6 +61,7 @@ function PieceRenderer:draw(piece, x, y)
         self.scale,
         self.scale
     )
+    love.graphics.setShader()
 end
 
 return PieceRenderer

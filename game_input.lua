@@ -47,9 +47,18 @@ function Input:mousepressed(x, y, button)
     if self.menu:mousepressed(x, y) then return end
     if self.board:isMoving() then
         local column, row = self.board:cellAtScreen(self.camera, x, y)
-        local moved, captured = self.board:moveTo(column, row)
-        self.menu:setStatus(moved and (captured and "Captured an enemy piece. Press Q for another action."
-            or "Piece moved. Press Q for another action.") or "Choose one of the cyan destination tiles.")
+        local moved, destroyed, damaged = self.board:moveTo(column, row)
+        local status = "Choose one of the cyan destination tiles."
+        if moved then
+            if destroyed then
+                status = "Enemy destroyed. Press Q for another action."
+            elseif damaged then
+                status = "Enemy damaged. Press Q for another action."
+            else
+                status = "Piece moved. Press Q for another action."
+            end
+        end
+        self.menu:setStatus(status)
         return
     end
 
