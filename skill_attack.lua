@@ -127,6 +127,7 @@ end
 
 function SkillAttack.execute(board, column, row)
     local attackers = board.attackingPieces or (board.attackingPiece and { board.attackingPiece })
+    if column == nil or row == nil then return false end
     local commands = board.skillCommands and board.skillCommands[key(column, row)]
     if not attackers or not commands or not SkillAttack.isTarget(board, column, row) then return false end
 

@@ -3,7 +3,10 @@ local Combat = require("combat")
 
 local Rules = {}
 
-function Rules.targetKey(column, row) return column .. ":" .. row end
+function Rules.targetKey(column, row)
+    if column == nil or row == nil then return nil end
+    return column .. ":" .. row
+end
 
 function Rules.pieceAt(board, column, row)
     for _, piece in ipairs(board.pieces) do
@@ -11,9 +14,15 @@ function Rules.pieceAt(board, column, row)
     end
 end
 
-function Rules.isInside(board, column, row) return column >= 0 and column < board.size and row >= 0 and row < board.size end
+function Rules.isInside(board, column, row)
+    return column ~= nil and row ~= nil
+        and column >= 0 and column < board.size and row >= 0 and row < board.size
+end
 
-function Rules.isMoveTarget(board, column, row) return board.moveTargets[Rules.targetKey(column, row)] == true end
+function Rules.isMoveTarget(board, column, row)
+    if column == nil or row == nil then return false end
+    return board.moveTargets[Rules.targetKey(column, row)] == true
+end
 
 function Rules.selectedPieces(board)
     local pieces = {}
