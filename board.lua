@@ -56,7 +56,7 @@ function Board:selectOnly(piece)
     self:cancelAttack()
 end
 
-function Board:selectPawnsInScreenRect(camera, firstX, firstY, lastX, lastY, anchorPawn)
+function Board:selectPawnsInScreenRect(camera, firstX, firstY, lastX, lastY, anchorPawn, team)
     local minX, maxX = math.min(firstX, lastX), math.max(firstX, lastX)
     local minY, maxY = math.min(firstY, lastY), math.max(firstY, lastY)
     local spriteSize = 32 * self.pieceScale * camera.zoom
@@ -64,7 +64,7 @@ function Board:selectPawnsInScreenRect(camera, firstX, firstY, lastX, lastY, anc
     local spriteBaseY = 30 * self.pieceScale * camera.zoom
     self:clearSelection()
     for _, piece in ipairs(self.pieces) do
-        if piece.kind == "pawn" then
+        if piece.kind == "pawn" and (team == nil or piece.team == team) then
             local x, y = Renderer.screenPosition(self, camera, piece)
             local spriteX, spriteY = x - spriteBaseX, y - spriteBaseY
             if spriteX <= maxX and spriteX + spriteSize >= minX

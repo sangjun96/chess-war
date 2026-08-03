@@ -1,6 +1,7 @@
 local ActionMenu = require("action_menu")
 local Board = require("board")
 local Camera = require("camera")
+local GameFlow = require("game_flow")
 local HUD = require("hud")
 local Input = require("game_input")
 local PieceSkills = require("piece_skills")
@@ -11,8 +12,9 @@ local skillEffects = SkillEffects.new()
 local board = Board.new(16, 68, 1.44, skillEffects)
 local camera = Camera.new(board.pixels)
 local fonts = {}
-local menu = ActionMenu.new(board, theme)
-local input = Input.new(board, camera, menu, theme)
+local flow = GameFlow.new(board)
+local menu = ActionMenu.new(board, flow, theme)
+local input = Input.new(board, camera, menu, flow, theme)
 
 function love.load()
     PieceSkills.validate()
@@ -32,7 +34,7 @@ end
 function love.draw()
     board:draw(camera)
     input:drawSelectionBox()
-    HUD.draw(theme, fonts, board, camera, menu.status)
+    HUD.draw(theme, fonts, board, camera, flow, menu.status)
     menu:draw(fonts)
 end
 

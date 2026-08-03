@@ -25,9 +25,10 @@ local function angleDistance(first, second)
     return math.abs((first - second + math.pi) % (2 * math.pi) - math.pi)
 end
 
-function ActionMenu.new(board, theme)
+function ActionMenu.new(board, flow, theme)
     return setmetatable({
         board = board,
+        flow = flow,
         theme = theme,
         open = false,
         x = 0,
@@ -52,6 +53,10 @@ function ActionMenu:openAtMouse()
 end
 
 function ActionMenu:toggle()
+    if not self.flow:isPlaying() then
+        self:close(self.flow.status)
+        return
+    end
     if self.open then
         self:close("Action menu closed. Press Q to open it again.")
     else
@@ -75,10 +80,10 @@ function ActionMenu:perform(action)
     if action.name == "CLOSE" then
         self:close("Action menu closed. Press Q to open it again.")
     elseif action.name == "MOVE" then
-        local started, message = self.board:beginMove()
+        local started, message = self.flow:beginMove()
         self:close(started and "Move: click a cyan tile to move the selection. Press Esc to cancel." or message)
     elseif action.name == "ATTACK" then
-        local _, message = self.board:beginAttack()
+        local _, message = self.flow:beginAttack()
         self:close(message)
     else
         self:close(action.name:sub(1, 1) .. action.name:sub(2):lower() .. " is not available yet.")

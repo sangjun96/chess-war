@@ -3,11 +3,12 @@ local Targeting = require("input_targeting")
 local Input = {}
 Input.__index = Input
 
-function Input.new(board, camera, menu, theme)
+function Input.new(board, camera, menu, flow, theme)
     return setmetatable({
         board = board,
         camera = camera,
         menu = menu,
+        flow = flow,
         theme = theme,
         pointerDown = false,
         pressX = 0,
@@ -47,12 +48,14 @@ end
 function Input:mousepressed(x, y, button)
     if button ~= 1 then return end
     if self.menu:mousepressed(x, y) then return end
-    if Targeting.handle(self.board, self.camera, self.menu, x, y) then return end
+    if Targeting.handle(self.board, self.camera, self.menu, self.flow, x, y) then return end
+    if not self.flow:isPlaying() then return end
 
     self.pointerDown = true
     self.pressX, self.pressY = x, y
     self.dragX, self.dragY = x, y
-    self.pressPiece = self.board:pieceAtScreen(self.camera, x, y)
+    local piece = self.board:pieceAtScreen(self.camera, x, y)
+    self.pressPiece = self.flow:canSelect(piece) and piece or nil
     self.panning = false
     self.selectingPawns = false
 end
@@ -60,10 +63,11 @@ end
 function Input:mousereleased(x, y, button)
     if button ~= 1 then return end
     if self.pointerDown and self.selectingPawns then
-        self.board:selectPawnsInScreenRect(self.camera, self.pressX, self.pressY, x, y, self.pressPiece)
+        self.board:selectPawnsInScreenRect(self.camera, self.pressX, self.pressY, x, y,
+            self.pressPiece, self.flow.activeTeam)
     elseif self.pointerDown and not self.panning then
         local piece = self.pressPiece or self.board:pieceAtScreen(self.camera, x, y)
-        if piece then self.board:selectOnly(piece) else self.board:clearSelection() end
+        if self.flow:canSelect(piece) then self.board:selectOnly(piece) else self.board:clearSelection() end
     end
     self.pointerDown = false
     self.pressPiece = nil
@@ -84,7 +88,8 @@ function Input:mousemoved(x, y, dx, dy)
         self.panning = not self.selectingPawns
     end
     if self.selectingPawns then
-        self.board:selectPawnsInScreenRect(self.camera, self.pressX, self.pressY, x, y, self.pressPiece)
+        self.board:selectPawnsInScreenRect(self.camera, self.pressX, self.pressY, x, y,
+            self.pressPiece, self.flow.activeTeam)
     elseif self.panning then
         self.camera:pan(dx, dy)
     end
