@@ -20,7 +20,9 @@ function Board.new(size, cellSize, pieceScale, skillEffects)
         moveCommands = {},
         movingPieces = nil,
         skillTargets = {},
+        skillCommands = {},
         skillPreviewTargets = {},
+        attackingPieces = nil,
         attackingPiece = nil,
         skillEffects = skillEffects,
     }, Board)
@@ -104,7 +106,7 @@ function Board:moveTo(column, row) return Rules.moveTo(self, column, row) end
 function Board:isSkillTarget(column, row) return SkillAttack.isTarget(self, column, row) end
 function Board:isSkillPreviewTarget(column, row) return SkillAttack.isPreviewTarget(self, column, row) end
 function Board:beginAttack() return SkillAttack.begin(self) end
-function Board:isAttacking() return self.attackingPiece ~= nil end
+function Board:isAttacking() return self.attackingPieces ~= nil end
 function Board:previewSkillAt(column, row) return SkillAttack.previewAt(self, column, row) end
 function Board:cancelAttack() return SkillAttack.cancel(self) end
 function Board:attackAt(column, row) return SkillAttack.execute(self, column, row) end

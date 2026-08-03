@@ -73,5 +73,44 @@ return function()
 
     board.selectedPiece = function() return nil end
     local valid, message = SkillAttack.begin(board)
-    assert(not valid and message:find("exactly one", 1, true))
+    assert(not valid and message:find("Select a piece", 1, true))
+
+    local firstPawn = {
+        column = 1, row = 1, kind = "pawn", team = "red", attack = 1, skillId = "impact",
+    }
+    local secondPawn = {
+        column = 2, row = 1, kind = "pawn", team = "red", attack = 1, skillId = "impact",
+    }
+    local firstTarget = {
+        column = 3, row = 1, kind = "pawn", team = "blue", hp = 3, maxHp = 3,
+    }
+    local secondTarget = {
+        column = 4, row = 1, kind = "pawn", team = "blue", hp = 3, maxHp = 3,
+    }
+    local formationEffects = {}
+    local formationBoard = {
+        size = 8,
+        pieces = { firstPawn, secondPawn, firstTarget, secondTarget },
+        selectedPieces = { [firstPawn] = true, [secondPawn] = true },
+        skillTargets = {},
+        skillEffects = {
+            trigger = function(_, ...)
+                table.insert(formationEffects, { ... })
+            end,
+        },
+    }
+
+    started = SkillAttack.begin(formationBoard)
+    assert(started and formationBoard.attackingPieces[1] and formationBoard.attackingPieces[2])
+    assert(SkillAttack.isTarget(formationBoard, 4, 1))
+
+    fired, destroyed, damaged, count = SkillAttack.execute(formationBoard, 4, 1)
+    assert(fired and not destroyed and damaged and count == 2)
+    assert(firstTarget.hp == 2 and secondTarget.hp == 2)
+    assert(#formationEffects == 2)
+    local effectTargets = {}
+    for _, effect in ipairs(formationEffects) do
+        effectTargets[effect[4] .. ":" .. effect[5]] = true
+    end
+    assert(effectTargets["3:1"] and effectTargets["4:1"])
 end
