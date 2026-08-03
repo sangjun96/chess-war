@@ -64,4 +64,48 @@ function TileRenderer:drawMoveTarget(x, y, cellSize)
     )
 end
 
+function TileRenderer:drawSkillTarget(x, y, cellSize)
+    local halfWidth = cellSize / 2
+    local halfHeight = cellSize / 4
+
+    love.graphics.setColor(1, 0.3, 0.12, 0.20)
+    love.graphics.polygon("fill",
+        x, y + 7,
+        x + halfWidth - 8, y + halfHeight,
+        x, y + cellSize / 2 - 7,
+        x - halfWidth + 8, y + halfHeight
+    )
+    love.graphics.setColor(1, 0.56, 0.2, 0.95)
+    love.graphics.setLineWidth(2)
+    love.graphics.polygon("line",
+        x, y + 7,
+        x + halfWidth - 8, y + halfHeight,
+        x, y + cellSize / 2 - 7,
+        x - halfWidth + 8, y + halfHeight
+    )
+end
+
+function TileRenderer:drawSkillArea(x, y, cellSize)
+    local halfWidth = cellSize / 2
+    local halfHeight = cellSize / 4
+
+    -- The red preview marks every tile that will be hit by the area skill.
+    -- The selected target is drawn over this in orange afterwards.
+    love.graphics.setColor(1, 0.18, 0.18, 0.18)
+    love.graphics.polygon("fill",
+        x, y + 9,
+        x + halfWidth - 10, y + halfHeight,
+        x, y + cellSize / 2 - 9,
+        x - halfWidth + 10, y + halfHeight
+    )
+    love.graphics.setColor(1, 0.34, 0.34, 0.85)
+    love.graphics.setLineWidth(2)
+    love.graphics.polygon("line",
+        x, y + 9,
+        x + halfWidth - 10, y + halfHeight,
+        x, y + cellSize / 2 - 9,
+        x - halfWidth + 10, y + halfHeight
+    )
+end
+
 return TileRenderer

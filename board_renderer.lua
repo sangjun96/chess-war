@@ -42,6 +42,14 @@ function Renderer.drawTiles(board, camera, firstColumn, firstRow, lastColumn, la
                 local x, y = camera:worldToIso(column * board.cellSize, row * board.cellSize)
                 board.tiles:drawMoveTarget(x, y, board.cellSize)
             end
+            if board:isSkillPreviewTarget(column, row) then
+                local x, y = camera:worldToIso(column * board.cellSize, row * board.cellSize)
+                board.tiles:drawSkillArea(x, y, board.cellSize)
+            end
+            if board:isSkillTarget(column, row) then
+                local x, y = camera:worldToIso(column * board.cellSize, row * board.cellSize)
+                board.tiles:drawSkillTarget(x, y, board.cellSize)
+            end
         end
     end
 end
@@ -81,6 +89,13 @@ function Renderer.drawPieces(board, camera)
             (piece.row + 0.5) * board.cellSize
         )
         board.pieceRenderer:draw(piece, centerX, centerY)
+    end
+    if board.skillEffects then board.skillEffects:draw(board, camera) end
+    for _, piece in ipairs(board.pieces) do
+        local centerX, centerY = camera:worldToIso(
+            (piece.column + 0.5) * board.cellSize,
+            (piece.row + 0.5) * board.cellSize
+        )
         PieceOverlayRenderer.drawHealth(piece, centerX, centerY, board.pieceScale)
     end
     for _, piece in ipairs(board.pieces) do

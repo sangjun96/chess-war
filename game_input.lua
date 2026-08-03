@@ -1,3 +1,5 @@
+local Targeting = require("input_targeting")
+
 local Input = {}
 Input.__index = Input
 
@@ -45,22 +47,7 @@ end
 function Input:mousepressed(x, y, button)
     if button ~= 1 then return end
     if self.menu:mousepressed(x, y) then return end
-    if self.board:isMoving() then
-        local column, row = self.board:cellAtScreen(self.camera, x, y)
-        local moved, destroyed, damaged = self.board:moveTo(column, row)
-        local status = "Choose one of the cyan destination tiles."
-        if moved then
-            if destroyed then
-                status = "Enemy destroyed. Press Q for another action."
-            elseif damaged then
-                status = "Enemy damaged. Press Q for another action."
-            else
-                status = "Piece moved. Press Q for another action."
-            end
-        end
-        self.menu:setStatus(status)
-        return
-    end
+    if Targeting.handle(self.board, self.camera, self.menu, x, y) then return end
 
     self.pointerDown = true
     self.pressX, self.pressY = x, y
@@ -85,6 +72,10 @@ function Input:mousereleased(x, y, button)
 end
 
 function Input:mousemoved(x, y, dx, dy)
+    if self.board:isAttacking() then
+        local column, row = self.board:cellAtScreen(self.camera, x, y)
+        self.board:previewSkillAt(column, row)
+    end
     if not self.pointerDown then return end
     self.dragX, self.dragY = x, y
     if not self.panning and not self.selectingPawns

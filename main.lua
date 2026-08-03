@@ -3,24 +3,30 @@ local Board = require("board")
 local Camera = require("camera")
 local HUD = require("hud")
 local Input = require("game_input")
+local PieceSkills = require("piece_skills")
+local SkillEffects = require("skill_effects")
 local theme = require("theme")
 
-local board = Board.new(16, 68, 1.44)
+local skillEffects = SkillEffects.new()
+local board = Board.new(16, 68, 1.44, skillEffects)
 local camera = Camera.new(board.pixels)
 local fonts = {}
 local menu = ActionMenu.new(board, theme)
 local input = Input.new(board, camera, menu, theme)
 
 function love.load()
+    PieceSkills.validate()
     love.graphics.setBackgroundColor(theme.background)
     love.graphics.setDefaultFilter("nearest", "nearest")
     board:loadAssets("assets/isocubic-chess")
+    skillEffects:load()
     fonts.title = love.graphics.newFont(18)
     fonts.body = love.graphics.newFont(12)
 end
 
 function love.update(dt)
     input:update(dt)
+    skillEffects:update(dt)
 end
 
 function love.draw()

@@ -2,12 +2,13 @@ local TileRenderer = require("tile_renderer")
 local PieceRenderer = require("piece_renderer")
 local Rules = require("board_rules")
 local Renderer = require("board_renderer")
+local SkillAttack = require("skill_attack")
 local StartingPieces = require("starting_pieces")
 
 local Board = {}
 Board.__index = Board
 
-function Board.new(size, cellSize, pieceScale)
+function Board.new(size, cellSize, pieceScale, skillEffects)
     return setmetatable({
         size = size,
         cellSize = cellSize,
@@ -18,6 +19,10 @@ function Board.new(size, cellSize, pieceScale)
         moveTargets = {},
         moveCommands = {},
         movingPieces = nil,
+        skillTargets = {},
+        skillPreviewTargets = {},
+        attackingPiece = nil,
+        skillEffects = skillEffects,
     }, Board)
 end
 
@@ -40,11 +45,13 @@ end
 function Board:clearSelection()
     self.selectedPieces = {}
     self:cancelMove()
+    self:cancelAttack()
 end
 
 function Board:selectOnly(piece)
     self.selectedPieces = { [piece] = true }
     self:cancelMove()
+    self:cancelAttack()
 end
 
 function Board:selectPawnsInScreenRect(camera, firstX, firstY, lastX, lastY, anchorPawn)
@@ -94,8 +101,14 @@ function Board:beginMove() return Rules.beginMove(self) end
 function Board:isMoving() return Rules.isMoving(self) end
 function Board:cancelMove() return Rules.cancelMove(self) end
 function Board:moveTo(column, row) return Rules.moveTo(self, column, row) end
+function Board:isSkillTarget(column, row) return SkillAttack.isTarget(self, column, row) end
+function Board:isSkillPreviewTarget(column, row) return SkillAttack.isPreviewTarget(self, column, row) end
+function Board:beginAttack() return SkillAttack.begin(self) end
+function Board:isAttacking() return self.attackingPiece ~= nil end
+function Board:previewSkillAt(column, row) return SkillAttack.previewAt(self, column, row) end
+function Board:cancelAttack() return SkillAttack.cancel(self) end
+function Board:attackAt(column, row) return SkillAttack.execute(self, column, row) end
 
-function Board:getVisibleCells(camera) return Renderer.getVisibleCells(self, camera) end
 function Board:drawTiles(camera, firstColumn, firstRow, lastColumn, lastRow)
     return Renderer.drawTiles(self, camera, firstColumn, firstRow, lastColumn, lastRow)
 end

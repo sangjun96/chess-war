@@ -1,4 +1,5 @@
 local PieceHealth = require("piece_health")
+local PieceSkills = require("piece_skills")
 
 local StartingPieces = {}
 
@@ -17,6 +18,7 @@ local function createPiece(column, row, kind, team)
         hp = health.hp,
         maxHp = health.maxHp,
         attack = health.attack,
+        skillId = PieceSkills.skillFor(kind),
     }
 end
 

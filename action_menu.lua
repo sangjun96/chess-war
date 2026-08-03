@@ -1,9 +1,11 @@
+local Renderer = require("action_menu_renderer")
+
 local ActionMenu = {}
 ActionMenu.__index = ActionMenu
 
 local actions = {
     { name = "MOVE", angle = -math.pi / 2, enabled = true },
-    { name = "ATTACK", angle = 0, enabled = false },
+    { name = "ATTACK", angle = 0, enabled = true },
     { name = "GUARD", angle = math.pi / 2, enabled = false },
     { name = "CLOSE", angle = math.pi, enabled = true },
 }
@@ -34,9 +36,7 @@ function ActionMenu.new(board, theme)
     }, ActionMenu)
 end
 
-function ActionMenu:setStatus(message)
-    self.status = message
-end
+function ActionMenu:setStatus(message) self.status = message end
 
 function ActionMenu:close(message)
     self.open = false
@@ -56,6 +56,7 @@ function ActionMenu:toggle()
         self:close("Action menu closed. Press Q to open it again.")
     else
         if self.board:isMoving() then self.board:cancelMove() end
+        if self.board:isAttacking() then self.board:cancelAttack() end
         self:openAtMouse()
     end
 end
@@ -76,6 +77,9 @@ function ActionMenu:perform(action)
     elseif action.name == "MOVE" then
         local started, message = self.board:beginMove()
         self:close(started and "Move: click a cyan tile to move the selection. Press Esc to cancel." or message)
+    elseif action.name == "ATTACK" then
+        local _, message = self.board:beginAttack()
+        self:close(message)
     else
         self:close(action.name:sub(1, 1) .. action.name:sub(2):lower() .. " is not available yet.")
     end
@@ -102,39 +106,14 @@ function ActionMenu:keypressed(key)
         self:setStatus("Move cancelled. Press Q to choose an action.")
         return true
     end
+    if key == "escape" and self.board:isAttacking() then
+        self.board:cancelAttack()
+        self:setStatus("Skill cancelled. Press Q to choose an action.")
+        return true
+    end
     return false
 end
 
-function ActionMenu:draw(fonts)
-    if not self.open then return end
-
-    local radius = 104
-    for _, action in ipairs(actions) do
-        local color = action.enabled and self.theme.actionFill or self.theme.actionDisabled
-        if action.name == "MOVE" then color = self.theme.actionMove end
-        love.graphics.setColor(color)
-        love.graphics.arc("fill", "pie", self.x, self.y, radius,
-            action.angle - math.pi / 4 + 0.025, action.angle + math.pi / 4 - 0.025, 18)
-        love.graphics.setColor(self.theme.actionEdge)
-        love.graphics.setLineWidth(1)
-        love.graphics.arc("line", "pie", self.x, self.y, radius,
-            action.angle - math.pi / 4 + 0.025, action.angle + math.pi / 4 - 0.025, 18)
-
-        local textX = self.x + math.cos(action.angle) * 66
-        local textY = self.y + math.sin(action.angle) * 66
-        love.graphics.setFont(fonts.body)
-        love.graphics.setColor(action.enabled and self.theme.text or self.theme.muted)
-        love.graphics.print(action.name, textX - fonts.body:getWidth(action.name) / 2, textY - 6)
-    end
-
-    love.graphics.setColor(self.theme.panel)
-    love.graphics.circle("fill", self.x, self.y, 32)
-    love.graphics.setColor(self.theme.actionEdge)
-    love.graphics.setLineWidth(1)
-    love.graphics.circle("line", self.x, self.y, 32)
-    love.graphics.setColor(self.theme.text)
-    love.graphics.setFont(fonts.body)
-    love.graphics.print("ACTION", self.x - fonts.body:getWidth("ACTION") / 2, self.y - 6)
-end
+function ActionMenu:draw(fonts) return Renderer.draw(self, fonts, actions) end
 
 return ActionMenu
