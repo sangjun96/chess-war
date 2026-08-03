@@ -36,14 +36,26 @@ The queen and king occupy the center two files.
 
 ## Artwork
 
-The tile and piece artwork in `assets/isocubic-chess/` is by Nikoichu and is
-licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).
-See `assets/isocubic-chess/License.txt` for the full license.
+The project includes third-party sprite artwork. Copyright remains with the
+respective creators; these assets are used under the licenses and terms below.
 
-The combat effects in `assets/skill-effects/` are selected from **Super Pixel
-Effects Gigapack (Free Version)** by Will Tice / unTied Games. See
-`assets/skill-effects/License.txt` for its license summary and attribution terms.
+- **Chess tiles and pieces** — [Isocubic Chess FREE - Chess Set](https://nikoichu.itch.io/isocubic-chess-free)
+  by Nikoichu, used in `assets/isocubic-chess/`. Licensed under
+  [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).
+  See `assets/isocubic-chess/License.txt` for the full license.
+- **Combat effects** — [Super Pixel Effects Gigapack (Free Version)](https://untiedgames.itch.io/super-pixel-effects-gigapack)
+  by Will Tice / unTied Games, used in `assets/skill-effects/`. Attribution is
+  required; commercial and non-commercial use are permitted, but the assets
+  themselves may not be resold. See `assets/skill-effects/License.txt` for the
+  full terms.
+- **Magic effects** — [Free Magic Pack 9](https://ansimuz.itch.io/gothicvania-magic-pack-9)
+  by Luis Zuno (ansimuz), used by composite effects in
+  `assets/skill-effects/royal-calamity/`. See the bundled
+  `assets/skill-effects/royal-calamity/Magic-Pack-9-license.pdf` for its
+  license terms.
 
-Several composite combat effects also use the supplied **Magic Pack 9** by Luis
-Zuno. Its bundled license is at
-`assets/skill-effects/royal-calamity/Magic-Pack-9-license.pdf`.
+## Development Credits
+
+- **Sound effects** — Generated with [ElevenLabs](https://elevenlabs.io/).
+- **Code development** — Built with assistance from the ChatGPT desktop app,
+  using a mix of Sol, Terra, and Luna models.
