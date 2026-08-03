@@ -3,13 +3,15 @@ local Targeting = require("input_targeting")
 local Input = {}
 Input.__index = Input
 
-function Input.new(board, camera, menu, flow, theme)
+function Input.new(board, camera, menu, flow, theme, credits, canControl)
     return setmetatable({
         board = board,
         camera = camera,
         menu = menu,
         flow = flow,
         theme = theme,
+        credits = credits,
+        canControl = canControl or function() return true end,
         pointerDown = false,
         pressX = 0,
         pressY = 0,
@@ -47,25 +49,28 @@ end
 
 function Input:mousepressed(x, y, button)
     if button ~= 1 then return end
-    if self.menu:mousepressed(x, y) then return end
-    if Targeting.handle(self.board, self.camera, self.menu, self.flow, x, y) then return end
+    if self.credits:mousepressed(x, y) then return end
+    local controls = self.canControl()
+    if controls and self.menu:mousepressed(x, y) then return end
+    if controls and Targeting.handle(self.board, self.camera, self.menu, self.flow, x, y) then return end
     if not self.flow:isPlaying() then return end
 
     self.pointerDown = true
     self.pressX, self.pressY = x, y
     self.dragX, self.dragY = x, y
     local piece = self.board:pieceAtScreen(self.camera, x, y)
-    self.pressPiece = self.flow:canSelect(piece) and piece or nil
+    self.pressPiece = controls and self.flow:canSelect(piece) and piece or nil
+    self.controlAtPress = controls
     self.panning = false
     self.selectingPawns = false
 end
 
 function Input:mousereleased(x, y, button)
     if button ~= 1 then return end
-    if self.pointerDown and self.selectingPawns then
+    if self.pointerDown and self.controlAtPress and self.selectingPawns then
         self.board:selectPawnsInScreenRect(self.camera, self.pressX, self.pressY, x, y,
             self.pressPiece, self.flow.activeTeam)
-    elseif self.pointerDown and not self.panning then
+    elseif self.pointerDown and self.controlAtPress and not self.panning then
         local piece = self.pressPiece or self.board:pieceAtScreen(self.camera, x, y)
         if self.flow:canSelect(piece) then self.board:selectOnly(piece) else self.board:clearSelection() end
     end
@@ -76,7 +81,7 @@ function Input:mousereleased(x, y, button)
 end
 
 function Input:mousemoved(x, y, dx, dy)
-    if self.board:isAttacking() then
+    if self.canControl() and self.board:isAttacking() then
         local column, row = self.board:cellAtScreen(self.camera, x, y)
         self.board:previewSkillAt(column, row)
     end
@@ -101,9 +106,11 @@ function Input:wheelmoved(_, y)
 end
 
 function Input:keypressed(key)
-    if key == "home" then
+    if self.credits:keypressed(key) then
+        return
+    elseif key == "home" then
         self.camera:reset()
-    elseif not self.menu:keypressed(key) and key == "escape" then
+    elseif (not self.canControl() or not self.menu:keypressed(key)) and key == "escape" then
         love.event.quit()
     end
 end

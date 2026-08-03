@@ -11,6 +11,7 @@ local armyRank = {
 local function createPiece(column, row, kind, team)
     local health = PieceHealth.create(kind)
     return {
+        id = string.format("%s-%s-%02d", team, kind, column),
         column = column,
         row = row,
         kind = kind,

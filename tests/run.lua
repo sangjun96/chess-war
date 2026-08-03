@@ -5,6 +5,11 @@ local tests = {
     (require("tests.test_skill_attack")),
     (require("tests.test_targeting_safety")),
     (require("tests.test_game_flow")),
+    (require("tests.test_credits_overlay")),
+    (require("tests.test_ai_actions")),
+    (require("tests.test_ai_search")),
+    (require("tests.test_ai_controller")),
+    (require("tests.test_difficulty_menu")),
 }
 
 for _, test in ipairs(tests) do test() end

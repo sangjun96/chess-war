@@ -1,0 +1,65 @@
+:root {
+  color-scheme: dark;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: #0c1017;
+  color: #eef3fa;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  background: radial-gradient(circle at top, #1b2b40, #0c1017 55%);
+}
+
+.game-shell, .credits-page {
+  width: min(1100px, calc(100% - 32px));
+  margin: 0 auto;
+}
+
+.game-shell { padding: 36px 0 16px; }
+
+h1, h2 { color: #fff; }
+h1 { margin: 0; font-size: clamp(1.8rem, 5vw, 3rem); }
+h2 { margin-bottom: 0.5rem; font-size: 1.15rem; }
+
+header p, .credits-page p { color: #b7c7d9; line-height: 1.6; }
+
+.game-frame {
+  height: clamp(480px, 70vh, 800px);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #6f849e;
+  border-radius: 12px;
+  background: #05070b;
+}
+
+.game-frame #canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  position: relative !important;
+}
+
+footer {
+  width: min(1100px, calc(100% - 32px));
+  margin: auto auto 28px;
+  text-align: center;
+}
+
+a { color: #77c7ff; }
+a:hover { color: #ffe154; }
+
+.credits-page { max-width: 780px; padding: 44px 0 64px; }
+.credits-page section {
+  margin-top: 24px;
+  padding: 20px 24px;
+  border: 1px solid #415469;
+  border-radius: 10px;
+  background: #151d28dd;
+}

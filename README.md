@@ -15,7 +15,7 @@ one 16-piece army: four rooks, four bishops, six knights, and one each of the
 unique queen and king. A full line of 16 pawns stands in front of each army.
 The queen and king occupy the center two files.
 
-- Red takes the first turn; after each completed move or skill, the turn passes to Blue. Both sides are manually controllable for now, so an AI controller can be added later without changing the turn flow.
+- Red is controlled by the AI and takes the first turn. The player controls Blue; after each completed move or skill, the turn passes to the other team.
 - Click a piece belonging to the active team to select it. Its tile receives a gold highlight and the piece receives a pointer above its head.
 - Drag from a pawn to draw a selection box. Only pawns inside the box are selected, so multiple-piece selection is limited to pawns.
 - Every piece has HP and a pixel-style health gauge above it. Pawns have 3 HP, minor pieces 5 HP, rooks 7 HP, the queen 9 HP, and the king 12 HP. Pieces also become darker and less saturated as their HP falls.
@@ -33,6 +33,23 @@ The queen and king occupy the center two files.
 - Hold `W`, `A`, `S`, or `D` to move the camera. Diagonal key combinations move at the same speed as a single direction.
 - Use the mouse wheel to zoom toward the cursor.
 - Press `Home` to return to the center. Press `Esc` to close a menu or cancel a move; press it again to quit.
+
+## Opponent AI
+
+Choose **Easy**, **Medium**, or **Hard** from the opening screen with the mouse,
+or press `1`, `2`, or `3` followed by `Enter`. The Red AI evaluates normal moves,
+skills, and shared-offset pawn formations, including full-line formation moves and
+volleys. During the Red turn, board actions are locked while camera controls remain
+available. After a match, press `R` for a rematch or `M` to choose a new difficulty.
+
+The headless match runner can be used to compare AI profiles and emits JSONL or CSV:
+
+```sh
+lua tests/run_ai_matches.lua 10 hard medium jsonl
+lua tests/run_ai_matches.lua 10 medium easy csv
+lua tests/run_ai_balance.lua 200 hard medium
+lua tests/run_ai_balance.lua 200 medium easy
+```
 
 ## Artwork
 
@@ -53,6 +70,30 @@ respective creators; these assets are used under the licenses and terms below.
   `assets/skill-effects/royal-calamity/`. See the bundled
   `assets/skill-effects/royal-calamity/Magic-Pack-9-license.pdf` for its
   license terms.
+
+## Credits and licenses
+
+The web build provides a visible **Credits & Licenses** footer link and a
+dedicated credits page. The game also opens its credits overlay with `C` or the
+on-screen **C Credits** button. Keep the original license texts with every
+distribution, and do not use the Isocubic Chess assets commercially without
+separate permission or a commercial license.
+
+## Web deployment
+
+The project is configured as a Cloudflare Workers Static Assets site. The web
+build packages the LÖVE source and assets as `dist/chess-war.love`, then copies
+the web player and credits pages to `dist/`.
+
+```sh
+npm install
+npm run dev
+# After authenticating with Cloudflare:
+npm run deploy
+```
+
+The web player files in `web/` are pinned to LÖVE 11.5. The Worker serves only
+static assets; no game or player data is sent to a server.
 
 ## Development Credits
 

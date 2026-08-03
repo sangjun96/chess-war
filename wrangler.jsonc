@@ -1,0 +1,16 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "chess-war",
+  "compatibility_date": "2026-08-03",
+  "workers_dev": true,
+  "routes": [
+    {
+      "pattern": "chess-war.bee-bear.org",
+      "custom_domain": true
+    }
+  ],
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  }
+}

@@ -77,6 +77,14 @@ function SkillEffects:update(dt)
     end
 end
 
+function SkillEffects:isBusy()
+    return #self.active > 0
+end
+
+function SkillEffects:clear()
+    self.active = {}
+end
+
 function SkillEffects:draw(board, camera)
     love.graphics.setColor(1, 1, 1, 1)
     for _, effect in ipairs(self.active) do
