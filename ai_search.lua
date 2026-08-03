@@ -34,7 +34,7 @@ function Search.new(state, team, profile, random, memory)
     state.activeTeam = team
     local self = setmetatable({
         state = state, profile = profile, random = random, memory = memory,
-        core = Core.new(profile), done = false, completedDepth = 0,
+        core = Core.new(profile, true), done = false, completedDepth = 0,
     }, Search)
     self.thread = coroutine.create(function() self:work() end)
     return self
@@ -48,23 +48,21 @@ function Search:work()
         if not ranked then break end
         self.ranked, self.completedDepth = ranked, depth
     end
-    self.ranked = self.ranked or quickFallback(fallback or Actions.generate(self.state, self.state.activeTeam))
+    self.ranked = self.ranked or quickFallback(fallback or self.core:generate(self.state))
     self.action = choose(self.ranked, self.profile, self.random)
     self.done = true
 end
 
-function Search:step(seconds)
-    local deadline = os.clock() + (seconds or 0.002)
-    while not self.done and os.clock() < deadline do
-        local ok, message = coroutine.resume(self.thread)
-        if not ok then error(message) end
-        if coroutine.status(self.thread) == "dead" then self.done = true end
-    end
+function Search:step()
+    if self.done then return true end
+    local ok, message = coroutine.resume(self.thread)
+    if not ok then error(message) end
+    if coroutine.status(self.thread) == "dead" then self.done = true end
     return self.done
 end
 
 function Search:run()
-    while not self.done do self:step(1) end
+    while not self.done do self:step() end
     return self:result()
 end
 

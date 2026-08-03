@@ -8,7 +8,10 @@ return function()
     local effects = { isBusy = function() return false end }
     local controller = Controller.new(board, flow, effects, "easy", 7, false)
     assert(not controller:canHumanAct())
-    for _ = 1, 120 do controller:update(0.02) end
+    for _ = 1, 160 do
+        controller:update(0.02)
+        if controller:canHumanAct() then break end
+    end
     assert(flow.activeTeam == "blue" and flow.turnNumber == 2)
     assert(controller:canHumanAct() and board:selectedCount() == 0)
     local advanced = 0

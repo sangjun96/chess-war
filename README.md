@@ -81,9 +81,11 @@ separate permission or a commercial license.
 
 ## Web deployment
 
-The project is configured as a Cloudflare Workers Static Assets site. The web
-build packages the LÖVE source and assets as `dist/chess-war.love`, then copies
-the web player and credits pages to `dist/`.
+The project is configured as a Cloudflare Workers Static Assets site. Each web
+build packages the LÖVE source and assets as a UUID-named file such as
+`dist/chess-war-<uuid>.love`, then writes that exact name into `dist/index.html`.
+This gives every deployment a new game URL, so the player's IndexedDB cache
+cannot reuse an older game build.
 
 ```sh
 npm install

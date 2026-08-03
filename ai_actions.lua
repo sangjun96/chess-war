@@ -78,14 +78,21 @@ local function addSelection(state, actorIds, result, seen, emptySkills)
     end
 end
 
-function Actions.generate(state, team)
-    local result, seen, emptySkills = {}, {}, {}
+function Actions.generate(state, team, checkpoint)
+    local result, seen, emptySkills, generated = {}, {}, {}, 0
     for _, piece in ipairs(state.pieces) do
-        if piece.team == team then addSelection(state, { piece.id }, result, seen, emptySkills) end
+        if piece.team == team then
+            addSelection(state, { piece.id }, result, seen, emptySkills)
+            generated = generated + 1
+            if checkpoint and generated % 4 == 0 then checkpoint() end
+        end
     end
     for _, actorIds in ipairs(Formations.groups(state, team)) do
         addSelection(state, actorIds, result, seen, emptySkills)
+        generated = generated + 1
+        if checkpoint and generated % 4 == 0 then checkpoint() end
     end
+    if checkpoint and generated % 4 ~= 0 then checkpoint() end
     if #result == 0 and emptySkills[1] then
         local fallback = emptySkills[1]
         add(result, seen, "skill", fallback.actors, fallback.offset, fallback.meta)

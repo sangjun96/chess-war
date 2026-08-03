@@ -51,7 +51,9 @@ function Controller:update(dt)
     if self.phase == "idle" or self.phase == "settling" then self:startThinking() end
     self.elapsed = self.elapsed + dt
     if self.phase == "thinking" then
-        self.search:step(0.002)
+        -- One coroutine slice per frame guarantees the renderer gets a turn
+        -- before the AI continues its search.
+        self.search:step()
         local action, info = self.search:result()
         if action and self.elapsed >= self.profile.thinkDelay and not self.effects:isBusy() then
             self:showAction(action, info)

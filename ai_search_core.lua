@@ -7,10 +7,14 @@ local TacticalPotential = require("ai_tactical_potential")
 local Core = {}
 Core.__index = Core
 
-function Core.new(profile)
+function Core.new(profile, cooperative)
     return setmetatable({
-        profile = profile, nodes = 0, started = os.clock(), cancelled = false, cache = {},
+        profile = profile, cooperative = cooperative, nodes = 0, started = os.clock(), cancelled = false, cache = {},
     }, Core)
+end
+
+function Core:checkpoint()
+    if self.cooperative then coroutine.yield() end
 end
 
 function Core:touch()
@@ -19,12 +23,16 @@ function Core:touch()
         return false
     end
     self.nodes = self.nodes + 1
-    if self.nodes % 16 == 0 then coroutine.yield() end
+    self:checkpoint()
     return true
 end
 
+function Core:generate(state)
+    return Actions.generate(state, state.activeTeam, function() self:checkpoint() end)
+end
+
 function Core:limited(state, tacticalOnly)
-    local generated, result, seen = Actions.generate(state, state.activeTeam), {}, {}
+    local generated, result, seen = self:generate(state), {}, {}
     local function include(action)
         local key = Actions.key(action)
         if not seen[key] then seen[key], result[#result + 1] = true, action end
