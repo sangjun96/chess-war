@@ -26,12 +26,7 @@ function Renderer.getVisibleCells(board, camera)
 end
 
 function Renderer.drawTiles(board, camera, firstColumn, firstRow, lastColumn, lastRow)
-    for row = firstRow, lastRow do
-        for column = firstColumn, lastColumn do
-            local x, y = camera:worldToIso(column * board.cellSize, row * board.cellSize)
-            board.tiles:draw(column, row, x, y, board.cellSize)
-        end
-    end
+    board.tileBatch:draw()
     for row = firstRow, lastRow do
         for column = firstColumn, lastColumn do
             if board:isTileSelected(column, row) then

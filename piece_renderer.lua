@@ -50,8 +50,10 @@ end
 function PieceRenderer:draw(piece, x, y)
     local damage = (1 - piece.hp / piece.maxHp) * 0.85
     love.graphics.setColor(1, 1, 1, 1)
-    self.damageShader:send("damage", damage)
-    love.graphics.setShader(self.damageShader)
+    if damage > 0 then
+        self.damageShader:send("damage", damage)
+        love.graphics.setShader(self.damageShader)
+    end
     love.graphics.draw(
         self.sheets[piece.team],
         self.quads[piece.kind],
@@ -61,7 +63,7 @@ function PieceRenderer:draw(piece, x, y)
         self.scale,
         self.scale
     )
-    love.graphics.setShader()
+    if damage > 0 then love.graphics.setShader() end
 end
 
 return PieceRenderer

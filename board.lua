@@ -1,4 +1,5 @@
 local TileRenderer = require("tile_renderer")
+local TileBatchRenderer = require("tile_batch_renderer")
 local PieceRenderer = require("piece_renderer")
 local Rules = require("board_rules")
 local Renderer = require("board_renderer")
@@ -30,6 +31,7 @@ end
 
 function Board:loadAssets(assetPath)
     self.tiles = TileRenderer.new(assetPath)
+    self.tileBatch = TileBatchRenderer.new(self.tiles, self.size, self.cellSize)
     self.pieceRenderer = PieceRenderer.new(assetPath, self.pieceScale)
 end
 
