@@ -1,5 +1,6 @@
 return {
     name = "Thunder Charge",
+    audio = "knight",
     range = 4,
     effectRadius = 0,
     fps = 18,

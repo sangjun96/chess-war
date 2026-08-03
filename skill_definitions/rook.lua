@@ -1,5 +1,6 @@
 return {
     name = "Siege Breaker",
+    audio = "rook",
     range = 6,
     effectRadius = 1,
     fps = 18,

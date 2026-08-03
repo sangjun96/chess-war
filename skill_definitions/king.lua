@@ -1,5 +1,6 @@
 return {
     name = "Royal Calamity",
+    audio = "king",
     range = 6,
     effectRadius = 2,
     fps = 15,

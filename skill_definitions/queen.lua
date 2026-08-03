@@ -1,5 +1,6 @@
 return {
     name = "Starfall Requiem",
+    audio = "queen",
     range = 5,
     effectRadius = 1,
     fps = 18,

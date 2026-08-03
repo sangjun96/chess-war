@@ -1,5 +1,6 @@
 return {
     name = "Arcane Judgment",
+    audio = "bishop",
     range = 3,
     effectRadius = 1,
     fps = 16,

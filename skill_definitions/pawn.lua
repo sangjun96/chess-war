@@ -1,5 +1,6 @@
 return {
     name = "Vanguard Breaker",
+    audio = "pawn",
     range = 2,
     effectRadius = 0,
     fps = 18,

@@ -1,13 +1,14 @@
 # Skill sounds
 
-Add optional Ogg Vorbis sound effects here using the skill ID as the filename:
+The bundled sounds use the piece name as an MP3 filename:
 
-- `impact.ogg`
-- `lightning.ogg`
-- `absorb.ogg`
-- `explosion.ogg`
-- `sparkle.ogg`
-- `royal_calamity.ogg`
+- `pawn.mp3`
+- `knight.mp3`
+- `bishop.mp3`
+- `rook.mp3`
+- `queen.mp3`
+- `king.mp3`
 
-Missing files are ignored. Because sounds belong to skill IDs, changing a piece's
-assignment in `piece_skills.lua` also changes which sound it plays.
+Each skill definition selects its audio by its `audio` field. Missing files are
+ignored. For compatibility with existing custom packs, a skill-named Ogg file
+(such as `impact.ogg`) is used when the corresponding piece MP3 is unavailable.

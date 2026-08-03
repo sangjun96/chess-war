@@ -11,10 +11,18 @@ end
 
 function SkillAudio:load(skillCatalog)
     self.sources = {}
-    for skillId in pairs(skillCatalog) do
-        local path = self.root .. "/" .. skillId .. ".ogg"
-        if love.filesystem.getInfo(path, "file") then
-            self.sources[skillId] = love.audio.newSource(path, "static")
+    for skillId, definition in pairs(skillCatalog) do
+        -- Piece-named MP3s are the preferred assets; the old skill-named Ogg
+        -- layout remains supported for custom sound packs.
+        local paths = {
+            definition.audio and self.root .. "/" .. definition.audio .. ".mp3",
+            self.root .. "/" .. skillId .. ".ogg",
+        }
+        for _, path in ipairs(paths) do
+            if path and love.filesystem.getInfo(path, "file") then
+                self.sources[skillId] = love.audio.newSource(path, "static")
+                break
+            end
         end
     end
 end
