@@ -75,7 +75,7 @@ function ActionMenu:perform(action)
         self:close("Action menu closed. Press Q to open it again.")
     elseif action.name == "MOVE" then
         local started, message = self.board:beginMove()
-        self:close(started and "Move: click a cyan tile to move. Press Esc to cancel." or message)
+        self:close(started and "Move: click a cyan tile to move the selection. Press Esc to cancel." or message)
     else
         self:close(action.name:sub(1, 1) .. action.name:sub(2):lower() .. " is not available yet.")
     end

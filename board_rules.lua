@@ -1,19 +1,8 @@
+local MoveGeneration = require("move_generation")
+
 local Rules = {}
 
-local knightOffsets = {
-    { 1, 2 }, { 2, 1 }, { 2, -1 }, { 1, -2 },
-    { -1, -2 }, { -2, -1 }, { -2, 1 }, { -1, 2 },
-}
-local rookDirections = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } }
-local bishopDirections = { { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } }
-local queenDirections = {
-    { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 },
-    { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 },
-}
-
-function Rules.targetKey(column, row)
-    return column .. ":" .. row
-end
+function Rules.targetKey(column, row) return column .. ":" .. row end
 
 function Rules.pieceAt(board, column, row)
     for _, piece in ipairs(board.pieces) do
@@ -21,109 +10,108 @@ function Rules.pieceAt(board, column, row)
     end
 end
 
-function Rules.isInside(board, column, row)
-    return column >= 0 and column < board.size and row >= 0 and row < board.size
-end
+function Rules.isInside(board, column, row) return column >= 0 and column < board.size and row >= 0 and row < board.size end
 
-function Rules.isMoveTarget(board, column, row)
-    return board.moveTargets[Rules.targetKey(column, row)] == true
+function Rules.isMoveTarget(board, column, row) return board.moveTargets[Rules.targetKey(column, row)] == true end
+
+function Rules.selectedPieces(board)
+    local pieces = {}
+    for piece in pairs(board.selectedPieces) do table.insert(pieces, piece) end
+    return pieces
 end
 
 function Rules.selectedPiece(board)
-    local piece = nil
-    for selected in pairs(board.selectedPieces) do
-        if piece then return nil end
-        piece = selected
+    local pieces = Rules.selectedPieces(board)
+    return #pieces == 1 and pieces[1] or nil
+end
+
+local function isLegalFormationMove(board, pieces, offset)
+    local key = MoveGeneration.offsetKey(offset.columnOffset, offset.rowOffset)
+    local movingPieces = {}
+    for _, piece in ipairs(pieces) do movingPieces[piece] = true end
+    for _, piece in ipairs(pieces) do
+        local target = Rules.pieceAt(board, piece.column + offset.columnOffset, piece.row + offset.rowOffset)
+        if (target and movingPieces[target]) or not MoveGeneration.legalOffsets(board, piece)[key] then return false end
     end
-    return piece
+    return true
 end
 
-local function addMoveTarget(board, piece, column, row)
-    if not Rules.isInside(board, column, row) then return false end
-    local occupant = Rules.pieceAt(board, column, row)
-    if occupant and occupant.team == piece.team then return false end
-    board.moveTargets[Rules.targetKey(column, row)] = true
-    return occupant == nil
+local function commonOffsets(board, pieces)
+    local common = MoveGeneration.legalOffsets(board, pieces[1])
+    for index = 2, #pieces do
+        local offsets = MoveGeneration.legalOffsets(board, pieces[index])
+        for key in pairs(common) do
+            if not offsets[key] then common[key] = nil end
+        end
+    end
+    for key, offset in pairs(common) do if not isLegalFormationMove(board, pieces, offset) then common[key] = nil end end
+    return common
 end
 
-local function addSlidingMoveTargets(board, piece, directions)
-    for _, direction in ipairs(directions) do
-        local column, row = piece.column + direction[1], piece.row + direction[2]
-        while Rules.isInside(board, column, row) do
-            if not addMoveTarget(board, piece, column, row) then break end
-            column, row = column + direction[1], row + direction[2]
+local function addFormationTargets(board, pieces, offsets)
+    board.moveTargets, board.moveCommands = {}, {}
+    for _, offset in pairs(offsets) do
+        for _, piece in ipairs(pieces) do
+            local column = piece.column + offset.columnOffset
+            local row = piece.row + offset.rowOffset
+            local key = Rules.targetKey(column, row)
+            board.moveTargets[key] = true
+            board.moveCommands[key] = board.moveCommands[key] or {}
+            table.insert(board.moveCommands[key], offset)
         end
     end
 end
 
 function Rules.beginMove(board)
-    local piece = Rules.selectedPiece(board)
-    if not piece then return false, "Select exactly one piece to move." end
-    board.moveTargets = {}
-    board.movingPiece = piece
+    local pieces = Rules.selectedPieces(board)
+    if #pieces == 0 then return false, "Select a piece to move." end
 
-    if piece.kind == "pawn" then
-        local direction = piece.team == "red" and 1 or -1
-        local startRow = piece.team == "red" and 1 or board.size - 2
-        local nextRow = piece.row + direction
-        if Rules.isInside(board, piece.column, nextRow) and not Rules.pieceAt(board, piece.column, nextRow) then
-            board.moveTargets[Rules.targetKey(piece.column, nextRow)] = true
-            local doubleRow = piece.row + direction * 2
-            if piece.row == startRow and not Rules.pieceAt(board, piece.column, doubleRow) then
-                board.moveTargets[Rules.targetKey(piece.column, doubleRow)] = true
-            end
-        end
-        for _, column in ipairs({ piece.column - 1, piece.column + 1 }) do
-            local target = Rules.pieceAt(board, column, nextRow)
-            if target and target.team ~= piece.team then
-                board.moveTargets[Rules.targetKey(column, nextRow)] = true
-            end
-        end
-    elseif piece.kind == "knight" then
-        for _, offset in ipairs(knightOffsets) do addMoveTarget(board, piece, piece.column + offset[1], piece.row + offset[2]) end
-    elseif piece.kind == "king" then
-        for columnOffset = -1, 1 do
-            for rowOffset = -1, 1 do
-                if columnOffset ~= 0 or rowOffset ~= 0 then
-                    addMoveTarget(board, piece, piece.column + columnOffset, piece.row + rowOffset)
-                end
-            end
-        end
-    elseif piece.kind == "rook" then
-        addSlidingMoveTargets(board, piece, rookDirections)
-    elseif piece.kind == "bishop" then
-        addSlidingMoveTargets(board, piece, bishopDirections)
-    elseif piece.kind == "queen" then
-        addSlidingMoveTargets(board, piece, queenDirections)
+    local offsets = commonOffsets(board, pieces)
+    if next(offsets) == nil then
+        return false, "The selected pieces do not share a legal move."
     end
 
-    if next(board.moveTargets) == nil then
-        Rules.cancelMove(board)
-        return false, "This piece has no valid moves."
-    end
+    board.movingPieces = pieces
+    addFormationTargets(board, pieces, offsets)
     return true
 end
 
 function Rules.isMoving(board)
-    return board.movingPiece ~= nil
+    return board.movingPieces ~= nil
 end
 
 function Rules.cancelMove(board)
     board.moveTargets = {}
-    board.movingPiece = nil
+    board.moveCommands = {}
+    board.movingPieces = nil
 end
 
 function Rules.moveTo(board, column, row)
-    if not board.movingPiece or column == nil or row == nil or not Rules.isMoveTarget(board, column, row) then return false end
-    local captured = Rules.pieceAt(board, column, row)
-    if captured then
-        for index, piece in ipairs(board.pieces) do
-            if piece == captured then table.remove(board.pieces, index); break end
+    if not board.movingPieces or column == nil or row == nil then return false end
+    local commands = board.moveCommands[Rules.targetKey(column, row)]
+    if not commands then return false end
+
+    for _, offset in ipairs(commands) do
+        if isLegalFormationMove(board, board.movingPieces, offset) then
+            local captured = false
+            for _, piece in ipairs(board.movingPieces) do
+                local target = Rules.pieceAt(board, piece.column + offset.columnOffset, piece.row + offset.rowOffset)
+                if target then
+                    for index, candidate in ipairs(board.pieces) do
+                        if candidate == target then table.remove(board.pieces, index); break end
+                    end
+                    captured = true
+                end
+            end
+            for _, piece in ipairs(board.movingPieces) do
+                piece.column = piece.column + offset.columnOffset
+                piece.row = piece.row + offset.rowOffset
+            end
+            Rules.cancelMove(board)
+            return true, captured
         end
     end
-    board.movingPiece.column, board.movingPiece.row = column, row
-    Rules.cancelMove(board)
-    return true, captured
+    return false
 end
 
 return Rules

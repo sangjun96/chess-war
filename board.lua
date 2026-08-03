@@ -20,7 +20,8 @@ function Board.new(size, cellSize, pieceScale)
         pieces = Board:createStartingPieces(size),
         selectedPieces = {},
         moveTargets = {},
-        movingPiece = nil,
+        moveCommands = {},
+        movingPieces = nil,
     }, Board)
 end
 
