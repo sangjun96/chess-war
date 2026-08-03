@@ -1,4 +1,5 @@
 local Renderer = require("action_menu_renderer")
+local ActionMath = require("action_math")
 
 local ActionMenu = {}
 ActionMenu.__index = ActionMenu
@@ -10,21 +11,6 @@ local actions = {
     { name = "CLOSE", angle = math.pi, enabled = true },
 }
 
-local function clamp(value, minimum, maximum)
-    return math.max(minimum, math.min(maximum, value))
-end
-
-local function angleAt(x, y)
-    if math.atan2 then return math.atan2(y, x) end
-    if x == 0 then return y >= 0 and math.pi / 2 or -math.pi / 2 end
-    local angle = math.atan(y / x)
-    return x < 0 and angle + math.pi or angle
-end
-
-local function angleDistance(first, second)
-    return math.abs((first - second + math.pi) % (2 * math.pi) - math.pi)
-end
-
 function ActionMenu.new(board, flow, theme)
     return setmetatable({
         board = board,
@@ -33,7 +19,7 @@ function ActionMenu.new(board, flow, theme)
         open = false,
         x = 0,
         y = 0,
-        status = "Select a piece, then press Q to choose an action.",
+        status = "Select a piece. Tap it again or press Q for actions.",
     }, ActionMenu)
 end
 
@@ -44,12 +30,15 @@ function ActionMenu:close(message)
     if message then self:setStatus(message) end
 end
 
-function ActionMenu:openAtMouse()
-    local mouseX, mouseY = love.mouse.getPosition()
-    self.x = clamp(mouseX, 116, love.graphics.getWidth() - 116)
-    self.y = clamp(mouseY, 116, love.graphics.getHeight() - 116)
+function ActionMenu:openAt(x, y)
+    self.x = ActionMath.clamp(x, 116, love.graphics.getWidth() - 116)
+    self.y = ActionMath.clamp(y, 116, love.graphics.getHeight() - 116)
     self.open = true
     self:setStatus("Choose an action from the wheel.")
+end
+
+function ActionMenu:openAtMouse()
+    self:openAt(love.mouse.getPosition())
 end
 
 function ActionMenu:toggle()
@@ -70,9 +59,9 @@ function ActionMenu:actionAt(x, y)
     local dx, dy = x - self.x, y - self.y
     local distance = math.sqrt(dx * dx + dy * dy)
     if distance < 32 or distance > 104 then return nil end
-    local angle = angleAt(dx, dy)
+    local angle = ActionMath.angleAt(dx, dy)
     for _, action in ipairs(actions) do
-        if angleDistance(angle, action.angle) <= math.pi / 4 then return action end
+        if ActionMath.angleDistance(angle, action.angle) <= math.pi / 4 then return action end
     end
 end
 

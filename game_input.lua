@@ -1,10 +1,11 @@
-local Targeting = require("input_targeting")
+local Pointer = require("pointer_input")
+local TouchInput = require("touch_input")
 
 local Input = {}
 Input.__index = Input
 
 function Input.new(board, camera, menu, flow, theme, credits, canControl)
-    return setmetatable({
+    local input = setmetatable({
         board = board,
         camera = camera,
         menu = menu,
@@ -23,6 +24,8 @@ function Input.new(board, camera, menu, flow, theme, credits, canControl)
         dragThreshold = 6,
         cameraSpeed = 800,
     }, Input)
+    input.touch = TouchInput.new(input)
+    return input
 end
 
 function Input:update(dt)
@@ -48,56 +51,27 @@ function Input:drawSelectionBox()
 end
 
 function Input:mousepressed(x, y, button)
-    if button ~= 1 then return end
-    if self.credits:mousepressed(x, y) then return end
-    local controls = self.canControl()
-    if controls and self.menu:mousepressed(x, y) then return end
-    if controls and Targeting.handle(self.board, self.camera, self.menu, self.flow, x, y) then return end
-    if not self.flow:isPlaying() then return end
-
-    self.pointerDown = true
-    self.pressX, self.pressY = x, y
-    self.dragX, self.dragY = x, y
-    local piece = self.board:pieceAtScreen(self.camera, x, y)
-    self.pressPiece = controls and self.flow:canSelect(piece) and piece or nil
-    self.controlAtPress = controls
-    self.panning = false
-    self.selectingPawns = false
+    Pointer.pressed(self, x, y, button)
 end
 
 function Input:mousereleased(x, y, button)
-    if button ~= 1 then return end
-    if self.pointerDown and self.controlAtPress and self.selectingPawns then
-        self.board:selectPawnsInScreenRect(self.camera, self.pressX, self.pressY, x, y,
-            self.pressPiece, self.flow.activeTeam)
-    elseif self.pointerDown and self.controlAtPress and not self.panning then
-        local piece = self.pressPiece or self.board:pieceAtScreen(self.camera, x, y)
-        if self.flow:canSelect(piece) then self.board:selectOnly(piece) else self.board:clearSelection() end
-    end
+    Pointer.released(self, x, y, button)
+end
+
+function Input:cancelPointer()
     self.pointerDown = false
     self.pressPiece = nil
+    self.pressWasSelected = false
+    self.deferPointerAction = false
     self.panning = false
     self.selectingPawns = false
 end
 
+function Input:touchPointerPressed(x, y) Pointer.pressed(self, x, y, 1, true) end
+function Input:touchPointerReleased(x, y) Pointer.released(self, x, y, 1) end
+
 function Input:mousemoved(x, y, dx, dy)
-    if self.canControl() and self.board:isAttacking() then
-        local column, row = self.board:cellAtScreen(self.camera, x, y)
-        self.board:previewSkillAt(column, row)
-    end
-    if not self.pointerDown then return end
-    self.dragX, self.dragY = x, y
-    if not self.panning and not self.selectingPawns
-        and (math.abs(x - self.pressX) > self.dragThreshold or math.abs(y - self.pressY) > self.dragThreshold) then
-        self.selectingPawns = self.pressPiece and self.pressPiece.kind == "pawn"
-        self.panning = not self.selectingPawns
-    end
-    if self.selectingPawns then
-        self.board:selectPawnsInScreenRect(self.camera, self.pressX, self.pressY, x, y,
-            self.pressPiece, self.flow.activeTeam)
-    elseif self.panning then
-        self.camera:pan(dx, dy)
-    end
+    Pointer.moved(self, x, y, dx, dy)
 end
 
 function Input:wheelmoved(_, y)
@@ -110,9 +84,19 @@ function Input:keypressed(key)
         return
     elseif key == "home" then
         self.camera:reset()
+    elseif key == "=" or key == "+" or key == "kp+" then
+        local width, height = love.graphics.getDimensions()
+        self.camera:zoomAt(width / 2, height / 2, 1)
+    elseif key == "-" or key == "kp-" then
+        local width, height = love.graphics.getDimensions()
+        self.camera:zoomAt(width / 2, height / 2, -1)
     elseif (not self.canControl() or not self.menu:keypressed(key)) and key == "escape" then
         love.event.quit()
     end
 end
+
+function Input:touchpressed(id, x, y) self.touch:pressed(id, x, y) end
+function Input:touchmoved(id, x, y, dx, dy) self.touch:moved(id, x, y, dx, dy) end
+function Input:touchreleased(id, x, y) self.touch:released(id, x, y) end
 
 return Input

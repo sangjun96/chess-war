@@ -9,9 +9,12 @@ local levels = {
 
 local function buttons()
     local width, height = love.graphics.getDimensions()
-    local buttonWidth, buttonHeight, gap = math.min(260, width - 80), 72, 16
+    local compact = height < 520
+    local buttonWidth = math.min(300, width - (width < 560 and 32 or 80))
+    local buttonHeight, gap = compact and 54 or 72, compact and 8 or 16
     local total = #levels * buttonHeight + (#levels - 1) * gap
-    local result, x, firstY = {}, (width - buttonWidth) / 2, (height - total) / 2 + 36
+    local firstY = compact and 112 or (height - total) / 2 + 36
+    local result, x = {}, (width - buttonWidth) / 2
     for index, level in ipairs(levels) do
         result[index] = { x = x, y = firstY + (index - 1) * (buttonHeight + gap),
             width = buttonWidth, height = buttonHeight, level = level }
@@ -52,13 +55,14 @@ function DifficultyMenu:draw(fonts)
     love.graphics.setColor(self.theme.background)
     love.graphics.rectangle("fill", 0, 0, width, height)
     love.graphics.setColor(self.theme.text)
-    love.graphics.setFont(fonts.resultTitle)
-    love.graphics.printf("CHESS WAR", 0, 72, width, "center")
+    local compact = height < 520
+    love.graphics.setFont(compact and fonts.title or fonts.resultTitle)
+    love.graphics.printf("CHESS WAR", 0, compact and 24 or 72, width, "center")
     love.graphics.setColor(self.theme.redTeam)
     love.graphics.setFont(fonts.statusBody)
-    love.graphics.printf("RED AI  vs  BLUE PLAYER", 0, 116, width, "center")
+    love.graphics.printf("RED AI  vs  BLUE PLAYER", 0, compact and 53 or 116, width, "center")
     love.graphics.setColor(self.theme.muted)
-    love.graphics.printf("Choose the Red AI difficulty", 0, 145, width, "center")
+    love.graphics.printf("Choose the Red AI difficulty", 0, compact and 76 or 145, width, "center")
     for index, item in ipairs(buttons()) do
         local selected = index == self.selected
         love.graphics.setColor(selected and self.theme.redTeamSoft or self.theme.panel)
@@ -68,14 +72,15 @@ function DifficultyMenu:draw(fonts)
         love.graphics.rectangle("line", item.x, item.y, item.width, item.height, 12, 12)
         love.graphics.setColor(self.theme.text)
         love.graphics.setFont(fonts.title)
-        love.graphics.print(index .. "  " .. item.level.label, item.x + 20, item.y + 14)
+        love.graphics.print(index .. "  " .. item.level.label, item.x + 20, item.y + (compact and 8 or 14))
         love.graphics.setColor(self.theme.muted)
         love.graphics.setFont(fonts.body)
-        love.graphics.print(item.level.detail, item.x + 20, item.y + 43)
+        if not compact then love.graphics.print(item.level.detail, item.x + 20, item.y + 43) end
     end
     love.graphics.setColor(self.theme.muted)
     love.graphics.setFont(fonts.body)
-    love.graphics.printf("Press 1 / 2 / 3, then Enter  -  or click a difficulty", 0, height - 52, width, "center")
+    love.graphics.printf(compact and "Tap a difficulty" or
+        "Press 1 / 2 / 3, then Enter  -  or click a difficulty", 0, height - 34, width, "center")
 end
 
 return DifficultyMenu

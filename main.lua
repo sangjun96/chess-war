@@ -7,8 +7,10 @@ local DifficultyMenu = require("difficulty_menu")
 local GameFlow = require("game_flow")
 local HUD = require("hud")
 local Input = require("game_input")
+local InputRouter = require("game_event_router")
 local PieceSkills = require("piece_skills")
 local SkillEffects = require("skill_effects")
+local WebViewport = require("web_viewport")
 local theme = require("theme")
 
 local skillEffects = SkillEffects.new()
@@ -17,6 +19,7 @@ local credits = CreditsOverlay.new(theme)
 local fonts = {}
 local board, camera, flow, actionMenu, input, ai
 local currentDifficulty = "medium"
+local viewport = WebViewport.new()
 
 local function startGame(difficulty)
     currentDifficulty = difficulty or currentDifficulty
@@ -25,6 +28,7 @@ local function startGame(difficulty)
     board = Board.new(16, 68, 1.44, skillEffects)
     board:loadAssets("assets/isocubic-chess")
     camera = Camera.new(board.pixels)
+    camera:fitToViewport(love.graphics.getDimensions())
     flow = GameFlow.new(board, "red")
     actionMenu = ActionMenu.new(board, flow, theme)
     local seed = os.time() + math.floor(love.timer.getTime() * 1000)
@@ -34,6 +38,7 @@ local function startGame(difficulty)
 end
 
 function love.load()
+    viewport:apply()
     PieceSkills.validate()
     love.graphics.setBackgroundColor(theme.background)
     love.graphics.setDefaultFilter("nearest", "nearest")
@@ -46,6 +51,7 @@ function love.load()
 end
 
 function love.update(dt)
+    viewport:update(dt, camera)
     skillEffects:update(dt)
     if difficultyMenu.active or not board then return end
     input:update(dt)
@@ -63,24 +69,15 @@ function love.draw()
     difficultyMenu:draw(fonts)
 end
 
-function love.mousepressed(x, y, button)
-    if difficultyMenu.active then
-        local difficulty = difficultyMenu:mousepressed(x, y, button)
-        if difficulty then startGame(difficulty) end
-    elseif input then input:mousepressed(x, y, button) end
-end
-
-function love.mousereleased(x, y, button)
-    if input and not difficultyMenu.active then input:mousereleased(x, y, button) end
-end
-
-function love.mousemoved(x, y, dx, dy)
-    if input and not difficultyMenu.active then input:mousemoved(x, y, dx, dy) end
-end
-
-function love.wheelmoved(x, y)
-    if input and not difficultyMenu.active then input:wheelmoved(x, y) end
-end
+InputRouter.install({
+    difficulty = difficultyMenu,
+    credits = credits,
+    flow = function() return flow end,
+    input = function() return input end,
+    startGame = startGame,
+    rematch = function() startGame(currentDifficulty) end,
+    showDifficulty = function() credits:close() difficultyMenu:show() end,
+})
 
 function love.keypressed(key)
     if difficultyMenu.active then

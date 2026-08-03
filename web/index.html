@@ -1,22 +1,50 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Chess War, a tactical chess game.">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <meta name="description" content="모바일과 데스크탑에서 즐기는 전술 체스 게임, Chess War.">
+    <meta name="theme-color" content="#080c12">
     <title>Chess War</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="styles.css">
+    <script defer src="game-controls.js"></script>
   </head>
   <body>
     <main class="game-shell">
       <header>
         <h1>Chess War</h1>
-        <p>Use mouse and keyboard to command the board.</p>
+        <p>탭하고, 드래그하고, 핀치해서 전장을 지휘하세요.</p>
       </header>
       <!-- The build replaces the placeholder with a new game archive name. -->
       <section class="game-frame" aria-label="Chess War game">
-        <script src="player.js?g=__GAME_ARCHIVE__&amp;v=11.5"></script>
+        <div class="game-stage" id="game-stage">
+          <nav class="screen-actions" aria-label="화면 설정">
+            <span class="camera-actions">
+              <button type="button" data-game-key="-" aria-label="축소">−</button>
+              <button type="button" data-game-key="home" aria-label="카메라 중앙 정렬">⌂</button>
+              <button type="button" data-game-key="=" aria-label="확대">＋</button>
+            </span>
+            <span class="display-actions">
+              <button type="button" id="help-button" aria-label="조작법 보기" aria-expanded="false">?</button>
+              <button type="button" id="fullscreen-button" aria-label="전체화면 시작">⛶</button>
+            </span>
+          </nav>
+          <aside class="control-guide" id="control-guide" aria-hidden="true">
+            <button type="button" id="help-close" aria-label="조작법 닫기">×</button>
+            <p class="eyebrow">TOUCH COMMANDS</p>
+            <h2>모바일 조작법</h2>
+            <dl>
+              <div><dt>탭</dt><dd>기물 선택 · 선택한 기물을 다시 탭하면 행동 메뉴</dd></div>
+              <div><dt>폰 드래그</dt><dd>여러 폰을 선택 상자로 한 번에 선택</dd></div>
+              <div><dt>빈 곳 드래그</dt><dd>카메라 이동</dd></div>
+              <div><dt>두 손가락</dt><dd>핀치 줌과 카메라 이동</dd></div>
+            </dl>
+            <p class="desktop-tip">데스크탑: 휠 줌 · WASD 이동 · Q 행동 메뉴 · Home 중앙 정렬</p>
+            <a href="credits.html">Credits &amp; Licenses</a>
+          </aside>
+          <script src="player.js?g=__GAME_ARCHIVE__&amp;v=11.5"></script>
+        </div>
       </section>
     </main>
     <footer>

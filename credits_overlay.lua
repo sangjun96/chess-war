@@ -1,6 +1,5 @@
 local CreditsOverlay = {}
 CreditsOverlay.__index = CreditsOverlay
-
 local credits = {
     "Chess tiles and pieces",
     "Isocubic Chess FREE - Chess Set by Nikoichu",
@@ -17,11 +16,9 @@ local credits = {
     "Sound effects",
     "Generated with ElevenLabs.",
 }
-
 function CreditsOverlay.new(theme)
     return setmetatable({ theme = theme, open = false }, CreditsOverlay)
 end
-
 function CreditsOverlay:toggle()
     self.open = not self.open
 end
@@ -31,7 +28,12 @@ function CreditsOverlay:close()
 end
 
 function CreditsOverlay:buttonBounds()
-    return 20, 64, 104, 30
+    local graphics = love and love.graphics
+    if graphics and graphics.getWidth and graphics.getHeight
+        and (graphics.getWidth() < 700 or graphics.getHeight() < 520) then
+        return 10, 112, 88, 34
+    end
+    return 20, 210, 104, 30
 end
 
 function CreditsOverlay:mousepressed(x, y)
@@ -68,7 +70,7 @@ function CreditsOverlay:drawButton(font)
     love.graphics.rectangle("line", left, top, width, height, 8, 8)
     love.graphics.setColor(self.theme.muted)
     love.graphics.setFont(font)
-    love.graphics.printf("C  CREDITS", left, top + 9, width, "center")
+    love.graphics.printf("CREDITS", left, top + (height - font:getHeight()) / 2, width, "center")
 end
 
 function CreditsOverlay:draw(fonts)

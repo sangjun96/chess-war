@@ -34,6 +34,19 @@ The queen and king occupy the center two files.
 - Use the mouse wheel to zoom toward the cursor.
 - Press `Home` to return to the center. Press `Esc` to close a menu or cancel a move; press it again to quit.
 
+## Mobile and fullscreen controls
+
+The web build adapts the game canvas and HUD to phones, tablets, orientation
+changes, and browser fullscreen. Tap the fullscreen icon in the upper-right to
+use the available display area without stretching the board.
+
+- Tap a piece to select it. Tap an already selected piece to open its action wheel.
+- Drag from a pawn to box-select multiple allied pawns. Drag from empty board space to pan.
+- Pinch with two fingers to zoom around the gesture midpoint. Move both fingers together to pan.
+- Use the on-screen minus, center, and plus buttons when precise camera control is preferable.
+- Touch actions are committed on release, so beginning a two-finger gesture does not accidentally move or attack.
+- The difficulty picker, turn card, credits control, and result actions use compact touch layouts on small screens.
+
 ## Opponent AI
 
 Choose **Easy**, **Medium**, or **Hard** from the opening screen with the mouse,

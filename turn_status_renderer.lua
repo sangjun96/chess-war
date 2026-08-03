@@ -33,6 +33,18 @@ local function commandPrompt(board, flow, aiStatus)
     return "Select a blue piece to begin"
 end
 
+local function compactPrompt(board, flow, aiStatus)
+    if flow.activeTeam == "red" then return aiStatus or "AI is planning" end
+    if board:isMoving() then return "Tap a cyan destination" end
+    if board:isAttacking() then return "Tap an orange target" end
+    if board:selectedCount() > 0 then return "Tap selected unit again for actions" end
+    return "Tap a blue unit"
+end
+
+local function isCompact()
+    return love.graphics.getWidth() < 700 or love.graphics.getHeight() < 520
+end
+
 local function drawTurnCard(theme, fonts, board, flow, aiStatus)
     local x, y, width, height = 24, 24, 332, 174
     local color = teamColor(theme, flow.activeTeam)
@@ -66,8 +78,28 @@ local function drawTurnCard(theme, fonts, board, flow, aiStatus)
         x + 194, y + 157, 116, "right")
 end
 
+local function drawCompactCard(theme, fonts, board, flow, aiStatus)
+    local width = math.max(176, love.graphics.getWidth() - 112)
+    local x, y, height = 10, 10, 92
+    local color = teamColor(theme, flow.activeTeam)
+    drawCard(theme, x, y, width, height, color, teamSoftColor(theme, flow.activeTeam))
+    love.graphics.setColor(theme.muted)
+    love.graphics.setFont(fonts.body)
+    love.graphics.print(string.format("TURN %02d", flow.turnNumber), x + 16, y + 13)
+    love.graphics.printf(flow.activeTeam == "red" and "AI" or "YOU", x, y + 13, width - 14, "right")
+    love.graphics.setColor(color)
+    love.graphics.setFont(fonts.title)
+    love.graphics.print(teamName[flow.activeTeam] .. " TEAM", x + 16, y + 31)
+    love.graphics.setColor(theme.text)
+    love.graphics.setFont(fonts.body)
+    love.graphics.printf(compactPrompt(board, flow, aiStatus), x + 16, y + 55, width - 32, "left")
+    love.graphics.setColor(theme.muted)
+    love.graphics.printf(string.format("%d selected", board:selectedCount()), x + 16, y + 74, width - 32, "left")
+end
+
 function StatusRenderer.draw(theme, fonts, board, flow, _, aiStatus)
     if flow.finished then ResultRenderer.draw(theme, fonts, flow, drawCard)
+    elseif isCompact() then drawCompactCard(theme, fonts, board, flow, aiStatus)
     else drawTurnCard(theme, fonts, board, flow, aiStatus) end
 end
 

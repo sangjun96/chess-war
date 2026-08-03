@@ -62,9 +62,10 @@ end
 
 function Renderer.pieceAtScreen(board, camera, screenX, screenY)
     board:sortPieces()
-    local spriteSize = 32 * board.pieceScale * camera.zoom
-    local spriteBaseX = 16 * board.pieceScale * camera.zoom
-    local spriteBaseY = 30 * board.pieceScale * camera.zoom
+    local visualSize = 32 * board.pieceScale * camera.zoom
+    local spriteSize = math.max(40, visualSize)
+    local spriteBaseX = spriteSize / 2
+    local spriteBaseY = spriteSize * 30 / 32
     for index = #board.pieces, 1, -1 do
         local piece = board.pieces[index]
         local x, y = Renderer.screenPosition(board, camera, piece)

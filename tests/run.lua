@@ -11,6 +11,8 @@ local tests = {
     (require("tests.test_ai_search")),
     (require("tests.test_ai_controller")),
     (require("tests.test_difficulty_menu")),
+    (require("tests.test_camera")),
+    (require("tests.test_touch_input")),
 }
 
 for _, test in ipairs(tests) do test() end
