@@ -6,9 +6,9 @@ function Camera.new(boardPixels)
         boardPixels = boardPixels,
         x = boardPixels / 2,
         y = boardPixels / 2,
-        zoom = 0.28,
-        minZoom = 0.07,
-        maxZoom = 3.5,
+        zoom = 1,
+        minZoom = 0.25,
+        maxZoom = 4,
     }, Camera)
 end
 
@@ -36,7 +36,7 @@ end
 function Camera:reset()
     self.x = self.boardPixels / 2
     self.y = self.boardPixels / 2
-    self.zoom = 0.28
+    self.zoom = 1
 end
 
 function Camera:pan(dx, dy)
