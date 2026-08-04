@@ -1,10 +1,11 @@
 local ActionMenu = require("action_menu")
-local AIController = require("ai_controller")
+local AIRoster = require("ai_roster")
 local Board = require("board")
 local Camera = require("camera")
 local CreditsOverlay = require("credits_overlay")
 local DifficultyMenu = require("difficulty_menu")
 local GameFlow = require("game_flow")
+local GameMode = require("game_mode")
 local HUD = require("hud")
 local Input = require("game_input")
 local InputRouter = require("game_event_router")
@@ -18,11 +19,12 @@ local difficultyMenu = DifficultyMenu.new(theme)
 local credits = CreditsOverlay.new(theme)
 local fonts = {}
 local board, camera, flow, actionMenu, input, ai
-local currentDifficulty = "medium"
+local currentModeId = "medium"
 local viewport = WebViewport.new()
 
-local function startGame(difficulty)
-    currentDifficulty = difficulty or currentDifficulty
+local function startGame(modeId)
+    currentModeId = modeId or currentModeId
+    local mode = GameMode.resolve(currentModeId)
     skillEffects:clear()
     credits:close()
     board = Board.new(16, 68, 1.44, skillEffects)
@@ -32,7 +34,7 @@ local function startGame(difficulty)
     flow = GameFlow.new(board, "red")
     actionMenu = ActionMenu.new(board, flow, theme)
     local seed = os.time() + math.floor(love.timer.getTime() * 1000)
-    ai = AIController.new(board, flow, skillEffects, currentDifficulty, seed, false)
+    ai = AIRoster.new(board, flow, skillEffects, mode, seed)
     input = Input.new(board, camera, actionMenu, flow, theme, credits,
         function() return ai:canHumanAct() and not credits.open end)
 end
@@ -62,7 +64,7 @@ function love.draw()
     if board then
         board:draw(camera)
         input:drawSelectionBox()
-        HUD.draw(theme, fonts, board, camera, flow, actionMenu.status, ai:status())
+        HUD.draw(theme, fonts, board, camera, flow, actionMenu.status, ai:status(), ai.automated)
         actionMenu:draw(fonts)
         credits:draw(fonts)
     end
@@ -75,20 +77,20 @@ InputRouter.install({
     flow = function() return flow end,
     input = function() return input end,
     startGame = startGame,
-    rematch = function() startGame(currentDifficulty) end,
+    rematch = function() startGame(currentModeId) end,
     showDifficulty = function() credits:close() difficultyMenu:show() end,
 })
 
 function love.keypressed(key)
     if difficultyMenu.active then
-        local difficulty = difficultyMenu:keypressed(key)
-        if difficulty then startGame(difficulty)
+        local modeId = difficultyMenu:keypressed(key)
+        if modeId then startGame(modeId)
         elseif key == "escape" then love.event.quit() end
         return
     end
     if flow and flow.finished then
         if credits:keypressed(key) then return
-        elseif key == "r" then startGame(currentDifficulty)
+        elseif key == "r" then startGame(currentModeId)
         elseif key == "m" then credits:close() difficultyMenu:show()
         elseif key == "escape" then love.event.quit() end
         return

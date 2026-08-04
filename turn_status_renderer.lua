@@ -25,7 +25,8 @@ local function drawCard(theme, x, y, width, height, color, softColor)
     love.graphics.rectangle("line", x, y, width, height, 16, 16)
 end
 
-local function commandPrompt(board, flow, aiStatus)
+local function commandPrompt(board, flow, aiStatus, automated)
+    if automated then return aiStatus or teamName[flow.activeTeam] .. " AI PREPARING" end
     if flow.activeTeam == "red" then return aiStatus or "RED AI PREPARING" end
     if board:isMoving() then return "MOVE MODE  -  choose a cyan tile" end
     if board:isAttacking() then return "ATTACK MODE  -  choose an orange tile" end
@@ -33,7 +34,8 @@ local function commandPrompt(board, flow, aiStatus)
     return "Select a blue piece to begin"
 end
 
-local function compactPrompt(board, flow, aiStatus)
+local function compactPrompt(board, flow, aiStatus, automated)
+    if automated then return aiStatus or "AI is planning" end
     if flow.activeTeam == "red" then return aiStatus or "AI is planning" end
     if board:isMoving() then return "Tap a cyan destination" end
     if board:isAttacking() then return "Tap an orange target" end
@@ -45,7 +47,7 @@ local function isCompact()
     return love.graphics.getWidth() < 700 or love.graphics.getHeight() < 520
 end
 
-local function drawTurnCard(theme, fonts, board, flow, aiStatus)
+local function drawTurnCard(theme, fonts, board, flow, aiStatus, automated)
     local x, y, width, height = 24, 24, 332, 174
     local color = teamColor(theme, flow.activeTeam)
     drawCard(theme, x, y, width, height, color, teamSoftColor(theme, flow.activeTeam))
@@ -65,20 +67,20 @@ local function drawTurnCard(theme, fonts, board, flow, aiStatus)
     love.graphics.circle("fill", x + 286, y + 81, 8)
     love.graphics.setColor(theme.text)
     love.graphics.setFont(fonts.statusBody)
-    love.graphics.print(flow.activeTeam == "red" and "AI TURN" or "YOUR TURN", x + 22, y + 108)
+    love.graphics.print((automated or flow.activeTeam == "red") and "AI TURN" or "YOUR TURN", x + 22, y + 108)
     love.graphics.setColor((board:isMoving() or board:isAttacking()) and theme.actionMove or theme.muted)
-    love.graphics.printf(commandPrompt(board, flow, aiStatus), x + 22, y + 128, width - 44, "left")
+    love.graphics.printf(commandPrompt(board, flow, aiStatus, automated), x + 22, y + 128, width - 44, "left")
     love.graphics.setColor(theme.panelEdge)
     love.graphics.line(x + 22, y + 151, x + width - 22, y + 151)
     love.graphics.setColor(theme.muted)
     love.graphics.setFont(fonts.body)
     love.graphics.print(string.format("%d unit%s selected", board:selectedCount(),
         board:selectedCount() == 1 and "" or "s"), x + 22, y + 157)
-    love.graphics.printf(flow.activeTeam == "blue" and "Q  ACTIONS" or "AI CONTROL",
+    love.graphics.printf(not automated and flow.activeTeam == "blue" and "Q  ACTIONS" or "AI CONTROL",
         x + 194, y + 157, 116, "right")
 end
 
-local function drawCompactCard(theme, fonts, board, flow, aiStatus)
+local function drawCompactCard(theme, fonts, board, flow, aiStatus, automated)
     local width = math.max(176, love.graphics.getWidth() - 112)
     local x, y, height = 10, 10, 92
     local color = teamColor(theme, flow.activeTeam)
@@ -86,21 +88,21 @@ local function drawCompactCard(theme, fonts, board, flow, aiStatus)
     love.graphics.setColor(theme.muted)
     love.graphics.setFont(fonts.body)
     love.graphics.print(string.format("TURN %02d", flow.turnNumber), x + 16, y + 13)
-    love.graphics.printf(flow.activeTeam == "red" and "AI" or "YOU", x, y + 13, width - 14, "right")
+    love.graphics.printf((automated or flow.activeTeam == "red") and "AI" or "YOU", x, y + 13, width - 14, "right")
     love.graphics.setColor(color)
     love.graphics.setFont(fonts.title)
     love.graphics.print(teamName[flow.activeTeam] .. " TEAM", x + 16, y + 31)
     love.graphics.setColor(theme.text)
     love.graphics.setFont(fonts.body)
-    love.graphics.printf(compactPrompt(board, flow, aiStatus), x + 16, y + 55, width - 32, "left")
+    love.graphics.printf(compactPrompt(board, flow, aiStatus, automated), x + 16, y + 55, width - 32, "left")
     love.graphics.setColor(theme.muted)
     love.graphics.printf(string.format("%d selected", board:selectedCount()), x + 16, y + 74, width - 32, "left")
 end
 
-function StatusRenderer.draw(theme, fonts, board, flow, _, aiStatus)
+function StatusRenderer.draw(theme, fonts, board, flow, _, aiStatus, automated)
     if flow.finished then ResultRenderer.draw(theme, fonts, flow, drawCard)
-    elseif isCompact() then drawCompactCard(theme, fonts, board, flow, aiStatus)
-    else drawTurnCard(theme, fonts, board, flow, aiStatus) end
+    elseif isCompact() then drawCompactCard(theme, fonts, board, flow, aiStatus, automated)
+    else drawTurnCard(theme, fonts, board, flow, aiStatus, automated) end
 end
 
 return StatusRenderer

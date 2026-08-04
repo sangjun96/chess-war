@@ -7,4 +7,7 @@ return function()
     menu:show()
     menu:keypressed("3")
     assert(menu:keypressed("kpenter") == "hard")
+    menu:show()
+    menu:keypressed("4")
+    assert(menu:keypressed("return") == "hard_vs_hard")
 end

@@ -56,7 +56,7 @@ function ResultRenderer.draw(theme, fonts, flow, drawCard)
         love.graphics.rectangle("line", button.x, button.y, button.width, button.height, 9, 9)
         love.graphics.setColor(theme.text)
         love.graphics.setFont(fonts.body)
-        local label = button.action == "rematch" and "R  REMATCH" or "M  DIFFICULTY"
+        local label = button.action == "rematch" and "R  REMATCH" or "M  MODES"
         love.graphics.printf(label, button.x, button.y + 11, button.width, "center")
     end
 end

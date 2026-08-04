@@ -19,4 +19,12 @@ return function()
         if pawn.team == "red" and pawn.kind == "pawn" and pawn.row > 1 then advanced = advanced + 1 end
     end
     assert(advanced > 1, "The AI opening should be able to execute a multi-pawn formation.")
+
+    local blue = Controller.new(board, flow, effects, "easy", 11, false, "blue")
+    for _ = 1, 160 do
+        blue:update(0.02)
+        if flow.turnNumber == 3 then break end
+    end
+    assert(flow.activeTeam == "red" and flow.turnNumber == 3,
+        "A Blue AI controller should automatically complete the Blue turn.")
 end

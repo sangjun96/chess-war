@@ -2,8 +2,8 @@ local StatusRenderer = require("turn_status_renderer")
 
 local HUD = {}
 
-function HUD.draw(theme, fonts, board, camera, flow, statusMessage, aiStatus)
-    StatusRenderer.draw(theme, fonts, board, flow, statusMessage, aiStatus)
+function HUD.draw(theme, fonts, board, camera, flow, statusMessage, aiStatus, automated)
+    StatusRenderer.draw(theme, fonts, board, flow, statusMessage, aiStatus, automated)
     if flow.finished then return end
 
     local width, height = love.graphics.getDimensions()

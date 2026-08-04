@@ -10,18 +10,19 @@ local State = require("ai_state")
 local Controller = {}
 Controller.__index = Controller
 
-function Controller.new(board, flow, effects, difficulty, seed, debugLog)
+function Controller.new(board, flow, effects, difficulty, seed, debugLog, team)
     return setmetatable({
         board = board, flow = flow, effects = effects, difficulty = difficulty,
         profile = Profiles.get(difficulty), random = Random.new(seed), memory = Memory.new(),
-        logger = Logger.new(debugLog), phase = "idle", elapsed = 0, retries = 0,
+        logger = Logger.new(debugLog), team = team or "red",
+        phase = "idle", elapsed = 0, retries = 0,
     }, Controller)
 end
 
 function Controller:startThinking()
     self.board:clearSelection()
-    local state = State.snapshot(self.board, "red")
-    self.search = Search.new(state, "red", self.profile, self.random, self.memory)
+    local state = State.snapshot(self.board, self.team)
+    self.search = Search.new(state, self.team, self.profile, self.random, self.memory)
     self.phase, self.elapsed = "thinking", 0
 end
 
@@ -35,8 +36,8 @@ function Controller:recover()
     self.board:clearSelection()
     self.retries = self.retries + 1
     if self.retries <= 1 then return self:startThinking() end
-    local state = State.snapshot(self.board, "red")
-    local fallback = Actions.generate(state, "red")[1]
+    local state = State.snapshot(self.board, self.team)
+    local fallback = Actions.generate(state, self.team)[1]
     self.retries = 0
     if fallback then return self:showAction(fallback, { nodes = 0, depth = 0, ranked = {} }) end
     self.phase = "idle"
@@ -44,7 +45,7 @@ end
 
 function Controller:update(dt)
     if not self.flow:isPlaying() then self.phase = "idle" return end
-    if self.flow.activeTeam == "blue" then
+    if self.flow.activeTeam ~= self.team then
         self.phase = self.effects:isBusy() and "settling" or "idle"
         return
     end
@@ -73,16 +74,17 @@ function Controller:update(dt)
 end
 
 function Controller:canHumanAct()
-    return self.flow:isPlaying() and self.flow.activeTeam == "blue"
+    return self.flow:isPlaying() and self.flow.activeTeam ~= self.team
         and self.phase == "idle" and not self.effects:isBusy()
 end
 
 function Controller:status()
-    local labels = {
-        thinking = "RED AI THINKING", show_selection = "RED AI SELECTING",
-        show_target = "RED AI TARGETING", settling = "RESOLVING ACTION",
+    local actionLabels = {
+        thinking = "AI THINKING", show_selection = "AI SELECTING",
+        show_target = "AI TARGETING", settling = "RESOLVING ACTION",
     }
-    return labels[self.phase]
+    local label = actionLabels[self.phase]
+    return label and (self.team:upper() .. " " .. label) or nil
 end
 
 return Controller

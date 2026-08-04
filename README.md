@@ -49,11 +49,12 @@ use the available display area without stretching the board.
 
 ## Opponent AI
 
-Choose **Easy**, **Medium**, or **Hard** from the opening screen with the mouse,
-or press `1`, `2`, or `3` followed by `Enter`. The Red AI evaluates normal moves,
+Choose **Easy**, **Medium**, **Hard**, or **Hard vs Hard** from the opening screen with the mouse,
+or press `1`, `2`, `3`, or `4` followed by `Enter`. Hard vs Hard is a hands-free demo
+mode where both armies use the Hard AI and fight automatically. The AI evaluates normal moves,
 skills, and shared-offset pawn formations, including full-line formation moves and
-volleys. During the Red turn, board actions are locked while camera controls remain
-available. After a match, press `R` for a rematch or `M` to choose a new difficulty.
+volleys. During AI-controlled turns, board actions are locked while camera controls remain
+available. After a match, press `R` for a rematch or `M` to choose a new mode.
 
 The headless match runner can be used to compare AI profiles and emits JSONL or CSV:
 
